@@ -35,7 +35,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKER_IMAGE_NAME }}
-      
+        
+        
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -43,9 +44,7 @@ jobs:
           platforms: linux/arm64, linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          outputs: type=docker,dest=/tmp/intermediate.tar
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Load intermediate image
-        run: |
-          docker load -i /tmp/intermediate.tar
-          docker image ls -a

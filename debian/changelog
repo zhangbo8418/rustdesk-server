@@ -1,5 +1,6 @@
 rustesk-server (1.1.99-4) PRERELASE; urgency=low
-
+  * allow tcp and ws protocol for register_pk
+  
 rustdesk-server (1.1.10-3) UNRELEASED; urgency=medium
   * fix on -2
 

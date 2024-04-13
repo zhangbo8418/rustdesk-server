@@ -1,4 +1,4 @@
-rustesk-server (1.1.99-4) UNRELEASED; urgency=low
+rustdesk-server (1.1.99-4) UNRELEASED; urgency=low
 
   * allow tcp and ws protocol for register_pk
 

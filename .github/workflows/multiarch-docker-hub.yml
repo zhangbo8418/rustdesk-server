@@ -74,13 +74,13 @@ jobs:
           docker create --platform linux/arm64 --name temp-container-arm64 ${{ secrets.DOCKER_IMAGE }}-integration:latest
           docker cp temp-container-arm64:/usr/local/share/debpackages/rustdesk-server-hbbr_${{ github.event.release.tag_name }}_arm64.deb /tmp/arm64/
           docker cp temp-container-arm64:/usr/local/share/debpackages/rustdesk-server-hbbs_${{ github.event.release.tag_name }}_arm64.deb /tmp/arm64/
-          docker cp temp-container-arm64:/usr/local/share/debpackages/rustdesk-server-utils_${{ github.event.release.tag_name }}_arm64.deb /tmp/amd64/
-          docker cp temp-container-arm64:/usr/local/bin/hbbs /tmp/amd64/zip/
-          docker cp temp-container-arm64:/usr/local/bin/hbbr /tmp/amd64/zip/
-          docker cp temp-container-arm64:/usr/local/bin/rustdesk-utils /tmp/amd64/zip/
+          docker cp temp-container-arm64:/usr/local/share/debpackages/rustdesk-server-utils_${{ github.event.release.tag_name }}_arm64.deb /tmp/arm64/
+          docker cp temp-container-arm64:/usr/local/bin/hbbs /tmp/arm64/zip/
+          docker cp temp-container-arm64:/usr/local/bin/hbbr /tmp/arm64/zip/
+          docker cp temp-container-arm64:/usr/local/bin/rustdesk-utils /tmp/arm64/zip/
           docker rm temp-container-arm64
           cd /tmp/arm64/zip
-          zip -r /tmp/amd64/linux-ubuntu-22.04_${{ github.event.release.tag_name }}_arm64.zip .
+          zip -r /tmp/arm64/linux-ubuntu-22.04_${{ github.event.release.tag_name }}_arm64.zip .
 
       - name: Upload Release Assets binaries for Ubuntu 22.04 arm64
         uses: softprops/action-gh-release@v2

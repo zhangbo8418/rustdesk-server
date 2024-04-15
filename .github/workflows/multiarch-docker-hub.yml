@@ -87,7 +87,7 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            /tmp/arm64/zip/inux-ubuntu-22.04_${{ github.event.release.tag_name }}_arm64.zip
+            /tmp/arm64/linux-ubuntu-22.04_${{ github.event.release.tag_name }}_arm64.zip
             /tmp/arm64/rustdesk-server-hbbr_${{ github.event.release.tag_name }}_arm64.deb
             /tmp/arm64/rustdesk-server-hbbs_${{ github.event.release.tag_name }}_arm64.deb
             /tmp/arm64/rustdesk-server-utils_${{ github.event.release.tag_name }}_arm64.deb
@@ -99,7 +99,7 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            /tmp/amd64/zip/inux-ubuntu-22.04_${{ github.event.release.tag_name }}_amd64.zip
+            /tmp/amd64/linux-ubuntu-22.04_${{ github.event.release.tag_name }}_amd64.zip
             /tmp/amd64/rustdesk-server-hbbr_${{ github.event.release.tag_name }}_amd64.deb
             /tmp/amd64/rustdesk-server-hbbs_${{ github.event.release.tag_name }}_amd64.deb
             /tmp/amd64/rustdesk-server-utils_${{ github.event.release.tag_name }}_amd64.deb

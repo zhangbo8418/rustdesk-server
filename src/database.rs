@@ -43,7 +43,7 @@ pub struct Peer {
     pub pk: Vec<u8>,
     pub user: Option<Vec<u8>>,
     pub info: String,
-    pub status: Option<i64>,
+    pub status: i64,
 }
 
 impl Database {

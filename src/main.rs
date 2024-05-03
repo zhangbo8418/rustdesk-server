@@ -4,9 +4,28 @@
 use flexi_logger::*;
 use hbb_common::{bail, config::RENDEZVOUS_PORT, ResultType};
 use hbbs::{common::*, *};
+use rocket::{
+    config::LogLevel,
+    data::{Limits, ToByteUnit},
+};
+use sctgdesk_api_server::build_rocket;
 
 const RMEM: usize = 0;
 
+#[rocket::main]
+async fn start_rocket() -> ResultType<()> {
+    let port = get_arg_or("port", RENDEZVOUS_PORT.to_string()).parse::<i32>()?;
+    let figment = rocket::Config::figment()
+        .merge(("address", "0.0.0.0"))
+        .merge(("port", port-2))
+        .merge(("log_level", LogLevel::Debug))
+        .merge(("secret_key", "wJq+s/xvwZjmMX3ev0p4gQTs9Ej5wt0brsk3ZGhoBTg="))
+        // .merge(("tls.certs", "rustdesk.crt"))
+        // .merge(("tls.key", "rustdesk.pem"))
+        .merge(("limits", Limits::new().limit("json", 2.mebibytes())));
+    let _rocket = build_rocket(figment).await.ignite().await?.launch().await?;
+    Ok(())
+}
 fn main() -> ResultType<()> {
     let _logger = Logger::try_with_env_or_str("info")?
         .log_to_stdout()
@@ -31,6 +50,8 @@ fn main() -> ResultType<()> {
     }
     let rmem = get_arg("rmem").parse::<usize>().unwrap_or(RMEM);
     let serial: i32 = get_arg("serial").parse().unwrap_or(0);
+    start_rocket();
     RendezvousServer::start(port, serial, &get_arg("key"), rmem)?;
+
     Ok(())
 }

@@ -8,6 +8,18 @@
   [<a href="README-DE.md">Deutsch</a>] | [<a href="README-NL.md">Nederlands</a>] | [<a href="README-TW.md">繁體中文</a>]<br>
 </p>
 
+# SctgDesk Server Program
+
+[![build](https://github.com/sctg-development/sctgdesk-server/actions/workflows/multiarch-docker-hub.yml/badge.svg)](https://github.com/sctg-development/sctgdesk-server/actions/workflows/multiarch-docker-hub.yml)
+
+[**Download**](https://github.com/sctg-development/sctgdesk-server/releases)
+
+This is a modified version of RustDesk Server, which is free and open source.  
+The first difference is that this version includes the new *tcp* mode included in the RustDesk Server Pro version.  
+The second difference is that this version includes a preliminary implementation of the Rustdesk Server Pro API server.  
+You can browse the API documentation in the builtins API server at the address `http://<server-ip>:21114/api/doc/`.  
+A non interactive API documentation is available at [sctgdesk-api-server repo](https://sctg-development.github.io/sctgdesk-api-server/).
+
 # RustDesk Server Program
 
 [![build](https://github.com/rustdesk/rustdesk-server/actions/workflows/build.yaml/badge.svg)](https://github.com/rustdesk/rustdesk-server/actions/workflows/build.yaml)

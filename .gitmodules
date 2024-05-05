@@ -1,4 +1,3 @@
 [submodule "sctgdesk-api-server"]
 	path = sctgdesk-api-server
 	url = https://github.com/sctg-development/sctgdesk-api-server.git
-    pushurl = git@github.com:sctg-development/sctgdesk-api-server.git

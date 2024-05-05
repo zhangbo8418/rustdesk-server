@@ -8,20 +8,35 @@ use rocket::{
     config::LogLevel,
     data::{Limits, ToByteUnit},
 };
+
+use std::{str::FromStr, thread};
 use sctgdesk_api_server::build_rocket;
 
 const RMEM: usize = 0;
 
+fn get_rocket_log_level() -> LogLevel {
+    let log_level_env = std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_string());
+    match log_level_env.as_str() {
+        "off" => return LogLevel::Off,
+        "error" => return LogLevel::Critical,
+        "warn" => return LogLevel::Normal,
+        "info" => return LogLevel::Normal,
+        "debug" => return LogLevel::Debug,
+        "trace" => return LogLevel::Debug,
+        _ => return LogLevel::Off
+        
+    }
+}
 #[rocket::main]
 async fn start_rocket() -> ResultType<()> {
     let port = get_arg_or("api-port", API_PORT.to_string()).parse::<i32>()?;
     let figment = rocket::Config::figment()
         .merge(("address", "0.0.0.0"))
         .merge(("port", port))
-        .merge(("log_level", LogLevel::Debug))
+        .merge(("log_level", get_rocket_log_level()))
         .merge(("secret_key", "wJq+s/xvwZjmMX3ev0p4gQTs9Ej5wt0brsk3ZGhoBTg="))
         .merge(("limits", Limits::new().limit("json", 2.mebibytes())));
-    let _rocket = build_rocket(figment).await.ignite().await?.launch();
+    let _rocket = build_rocket(figment).await.ignite().await?.launch().await;
     Ok(())
 }
 
@@ -70,8 +85,12 @@ fn main() -> ResultType<()> {
     }
     let rmem = get_arg("rmem").parse::<usize>().unwrap_or(RMEM);
     let serial: i32 = get_arg("serial").parse().unwrap_or(0);
-    start_rocket();
-    RendezvousServer::start(port, serial, &get_arg("key"), rmem)?;
+    
+    let rocket_thread = thread::spawn(|| {
+        let _ = start_rocket();
+    });
 
+    RendezvousServer::start(port, serial, &get_arg("key"), rmem)?;
+    let _ = rocket_thread.join();
     Ok(())
 }

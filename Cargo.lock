@@ -1118,10 +1118,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94b22e06ecb0110981051723910cbf0b5f5e09a2062dd7663334ee79a9d1286c"
 dependencies = [
  "cfg-if",
- "js-sys",
  "libc",
  "wasi",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -1273,7 +1271,7 @@ dependencies = [
  "headers",
  "http 0.2.12",
  "ipnetwork",
- "jsonwebtoken 8.3.0",
+ "jsonwebtoken",
  "lazy_static",
  "local-ip-address",
  "mac_address",
@@ -1689,23 +1687,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6971da4d9c3aa03c3d8f3ff0f4155b534aad021292003895a469716b2a230378"
 dependencies = [
  "base64 0.21.7",
- "pem 1.1.1",
+ "pem",
  "ring 0.16.20",
- "serde",
- "serde_json",
- "simple_asn1",
-]
-
-[[package]]
-name = "jsonwebtoken"
-version = "9.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9ae10193d25051e74945f1ea2d0b42e03cc3b890f7e4cc5faa44997d808193f"
-dependencies = [
- "base64 0.21.7",
- "js-sys",
- "pem 3.0.4",
- "ring 0.17.8",
  "serde",
  "serde_json",
  "simple_asn1",
@@ -2130,7 +2113,6 @@ dependencies = [
 [[package]]
 name = "oauth2"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#2a4dc1611b0aa79d9d9479238e860f590893715e"
 dependencies = [
  "base64 0.22.1",
  "log",
@@ -2339,16 +2321,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pem"
-version = "3.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e459365e590736a54c3fa561947c84837534b8e9af6fc5bf781307e82658fae"
-dependencies = [
- "base64 0.22.1",
- "serde",
-]
-
-[[package]]
 name = "percent-encoding"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2521,7 +2493,7 @@ dependencies = [
  "quinn-proto",
  "quinn-udp",
  "rustc-hash",
- "rustls 0.20.9",
+ "rustls",
  "thiserror",
  "tokio",
  "tracing",
@@ -2538,7 +2510,7 @@ dependencies = [
  "rand",
  "ring 0.16.20",
  "rustc-hash",
- "rustls 0.20.9",
+ "rustls",
  "rustls-native-certs",
  "slab",
  "thiserror",
@@ -2875,15 +2847,12 @@ dependencies = [
  "percent-encoding",
  "pin-project-lite",
  "ref-cast",
- "rustls 0.21.12",
- "rustls-pemfile 1.0.4",
  "serde",
  "smallvec",
  "stable-pattern",
  "state 0.6.0",
  "time",
  "tokio",
- "tokio-rustls 0.24.1",
  "uncased",
 ]
 
@@ -2963,18 +2932,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustls"
-version = "0.21.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f56a14d1f48b391359b22f731fd4bd7e43c97f3c50eee276f3aa09c94784d3e"
-dependencies = [
- "log",
- "ring 0.17.8",
- "rustls-webpki",
- "sct",
-]
-
-[[package]]
 name = "rustls-native-certs"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3010,16 +2967,6 @@ name = "rustls-pki-types"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "beb461507cee2c2ff151784c52762cf4d9ff6a61f3e80968600ed24fa837fa54"
-
-[[package]]
-name = "rustls-webpki"
-version = "0.101.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b6275d1ee7a1cd780b64aca7726599a1dbc893b1e64144529e55c3c2f745765"
-dependencies = [
- "ring 0.17.8",
- "untrusted 0.9.0",
-]
 
 [[package]]
 name = "rustversion"
@@ -3101,7 +3048,6 @@ dependencies = [
 [[package]]
 name = "sctgdesk-api-server"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#2a4dc1611b0aa79d9d9479238e860f590893715e"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
@@ -3410,7 +3356,7 @@ dependencies = [
  "once_cell",
  "paste",
  "percent-encoding",
- "rustls 0.20.9",
+ "rustls",
  "rustls-pemfile 1.0.4",
  "serde",
  "serde_json",
@@ -3453,7 +3399,7 @@ checksum = "804d3f245f894e61b1e6263c84b23ca675d96753b5abfd5cc8597d86806e8024"
 dependencies = [
  "once_cell",
  "tokio",
- "tokio-rustls 0.23.4",
+ "tokio-rustls",
 ]
 
 [[package]]
@@ -3468,11 +3414,9 @@ dependencies = [
 [[package]]
 name = "state"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#2a4dc1611b0aa79d9d9479238e860f590893715e"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
- "jsonwebtoken 9.3.0",
  "log",
  "oauth2",
  "reqwest",
@@ -3745,19 +3689,9 @@ version = "0.23.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c43ee83903113e03984cb9e5cebe6c04a5116269e900e3ddba8f068a62adda59"
 dependencies = [
- "rustls 0.20.9",
+ "rustls",
  "tokio",
  "webpki",
-]
-
-[[package]]
-name = "tokio-rustls"
-version = "0.24.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c28327cf380ac148141087fbfb9de9d7bd4e84ab5d2c28fbc911d753de8a7081"
-dependencies = [
- "rustls 0.21.12",
- "tokio",
 ]
 
 [[package]]
@@ -4203,7 +4137,6 @@ checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#2a4dc1611b0aa79d9d9479238e860f590893715e"
 dependencies = [
  "base64 0.22.1",
  "chrono",

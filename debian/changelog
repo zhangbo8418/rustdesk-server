@@ -1,3 +1,7 @@
+rustdesk-server (1.1.99-9) UNRELEASED; urgency=low
+
+  * use sctgdesk-api-server as a submodule
+
 rustdesk-server (1.1.99-8) UNRELEASED; urgency=low
 
   * can select api port

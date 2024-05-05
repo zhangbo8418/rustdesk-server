@@ -9,7 +9,7 @@ use rocket::{
     data::{Limits, ToByteUnit},
 };
 
-use std::{str::FromStr, thread};
+use std::thread;
 use sctgdesk_api_server::build_rocket;
 
 const RMEM: usize = 0;

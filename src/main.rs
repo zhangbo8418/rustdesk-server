@@ -23,13 +23,34 @@ async fn start_rocket() -> ResultType<()> {
         // .merge(("tls.certs", "rustdesk.crt"))
         // .merge(("tls.key", "rustdesk.pem"))
         .merge(("limits", Limits::new().limit("json", 2.mebibytes())));
-    let _rocket = build_rocket(figment).await.ignite().await?.launch().await?;
+    let _rocket = build_rocket(figment).await.ignite().await?.launch();
     Ok(())
 }
+
+fn log_format(
+    write: &mut dyn std::io::Write,
+    now: &mut DeferredNow,
+    record: &Record,
+) -> Result<(), std::io::Error> {
+    let file = record.file().unwrap_or("unknown");
+    let line = record.line().unwrap_or(0);
+    let file = file.rsplitn(2, '/').next().unwrap_or(file); // Obtenez seulement le nom du fichier, pas le chemin complet
+    let timestamp = now.now().to_string();
+    write!(
+        write,
+        "{} [{}] {}:{} - {}",
+        timestamp,
+        record.level(),
+        file,
+        line,
+        record.args()
+    )
+}
+
 fn main() -> ResultType<()> {
     let _logger = Logger::try_with_env_or_str("info")?
         .log_to_stdout()
-        .format(opt_format)
+        .format(log_format)
         .write_mode(WriteMode::Async)
         .start()?;
     let args = format!(

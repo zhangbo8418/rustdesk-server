@@ -1,3 +1,9 @@
+rustdesk-server (1.1.99-8) UNRELEASED; urgency=low
+
+  * can select api port
+
+ -- sctg <sctg@world.com>  Sun, 05 May 2024 11:28:00 +0800
+
 rustdesk-server (1.1.99-7) UNRELEASED; urgency=high
 
   * BUG: integrates sctgdesk-api-server

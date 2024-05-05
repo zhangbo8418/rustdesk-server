@@ -2,7 +2,7 @@
 // https://blog.csdn.net/bytxl/article/details/44344855
 
 use flexi_logger::*;
-use hbb_common::{bail, config::RENDEZVOUS_PORT, ResultType};
+use hbb_common::{bail, config::RENDEZVOUS_PORT,config::API_PORT, ResultType};
 use hbbs::{common::*, *};
 use rocket::{
     config::LogLevel,
@@ -14,14 +14,12 @@ const RMEM: usize = 0;
 
 #[rocket::main]
 async fn start_rocket() -> ResultType<()> {
-    let port = get_arg_or("port", RENDEZVOUS_PORT.to_string()).parse::<i32>()?;
+    let port = get_arg_or("api-port", API_PORT.to_string()).parse::<i32>()?;
     let figment = rocket::Config::figment()
         .merge(("address", "0.0.0.0"))
-        .merge(("port", port-2))
+        .merge(("port", port))
         .merge(("log_level", LogLevel::Debug))
         .merge(("secret_key", "wJq+s/xvwZjmMX3ev0p4gQTs9Ej5wt0brsk3ZGhoBTg="))
-        // .merge(("tls.certs", "rustdesk.crt"))
-        // .merge(("tls.key", "rustdesk.pem"))
         .merge(("limits", Limits::new().limit("json", 2.mebibytes())));
     let _rocket = build_rocket(figment).await.ignite().await?.launch();
     Ok(())
@@ -55,6 +53,7 @@ fn main() -> ResultType<()> {
         .start()?;
     let args = format!(
         "-c --config=[FILE] +takes_value 'Sets a custom config file'
+        -a, --api-port=[NUMBER(default={API_PORT})] 'Sets the listening port of API server'
         -p, --port=[NUMBER(default={RENDEZVOUS_PORT})] 'Sets the listening port'
         -s, --serial=[NUMBER(default=0)] 'Sets configure update serial number'
         -R, --rendezvous-servers=[HOSTS] 'Sets rendezvous servers, seperated by colon'

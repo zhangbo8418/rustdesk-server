@@ -28,7 +28,7 @@ cargo build --release
 
 Three executables will be generated in target/release.
 
-- hbbs - RustDesk ID/Rendezvous server
+- hbbs - RustDesk ID/Rendezvous server with API server
 - hbbr - RustDesk relay server
 - rustdesk-utils - RustDesk CLI utilities
 
@@ -82,6 +82,7 @@ services:
   hbbs:
     container_name: hbbs
     ports:
+      - 21115:21115
       - 21115:21115
       - 21116:21116
       - 21116:21116/udp

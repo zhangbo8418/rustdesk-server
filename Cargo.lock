@@ -2113,6 +2113,7 @@ dependencies = [
 [[package]]
 name = "oauth2"
 version = "0.1.0"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#f9a8d0f8d4ec04bae6790874ed2c7aac6aeba23b"
 dependencies = [
  "base64 0.22.1",
  "log",
@@ -3048,6 +3049,7 @@ dependencies = [
 [[package]]
 name = "sctgdesk-api-server"
 version = "0.1.0"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#f9a8d0f8d4ec04bae6790874ed2c7aac6aeba23b"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
@@ -3414,6 +3416,7 @@ dependencies = [
 [[package]]
 name = "state"
 version = "0.1.0"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#f9a8d0f8d4ec04bae6790874ed2c7aac6aeba23b"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
@@ -4137,6 +4140,7 @@ checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
 [[package]]
 name = "utils"
 version = "0.1.0"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#f9a8d0f8d4ec04bae6790874ed2c7aac6aeba23b"
 dependencies = [
  "base64 0.22.1",
  "chrono",

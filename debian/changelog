@@ -1,3 +1,9 @@
+rustdesk-server (1.1.99-11) UNRELEASED; urgency=low
+
+  * support more api
+  
+-- sctg <sctg@world.com>  Mon, 06 May 2024 18:01:00 +0800
+
 rustdesk-server (1.1.99-10) UNRELEASED; urgency=low
 
   * update sctgdesk-api-server

@@ -1,6 +1,14 @@
+rustdesk-server (1.1.99-10) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+
+-- sctg <sctg@world.com>  Mon, 06 May 2024 07:09:00 +0800
+
 rustdesk-server (1.1.99-9) UNRELEASED; urgency=low
 
   * use sctgdesk-api-server as a submodule
+
+-- sctg <sctg@world.com>  Sun, 05 May 2024 17:28:00 +0800
 
 rustdesk-server (1.1.99-8) UNRELEASED; urgency=low
 

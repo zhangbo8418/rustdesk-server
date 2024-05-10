@@ -85,8 +85,6 @@ fn main() -> ResultType<()> {
     }
     let rmem = get_arg("rmem").parse::<usize>().unwrap_or(RMEM);
     let serial: i32 = get_arg("serial").parse().unwrap_or(0);
-
-    let software_version = env!("MAIN_PKG_VERSION");
     
     let rocket_thread = thread::spawn(|| {
         let _ = start_rocket();

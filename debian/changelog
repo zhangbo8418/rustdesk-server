@@ -1,3 +1,8 @@
+rustdesk-server (1.1.99-15) UNRELEASED; urgency=low
+
+  * oauth: add support for github
+  * bug: address book name must be unique
+  
 rustdesk-server (1.1.99-14) UNRELEASED; urgency=low
 
   * oauth: use username from id_token if available

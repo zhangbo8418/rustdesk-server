@@ -8,7 +8,9 @@ COPY Cargo.toml /build/Cargo.toml
 COPY Cargo.lock /build/Cargo.lock
 COPY build.rs /build/build.rs
 COPY db_v2.sqlite3 /build/db_v2.sqlite3
-RUN . /root/.cargo/env && cd /build && DATABASE_URL=sqlite://$(pwd)/db_v2.sqlite3 cargo build --release
+RUN . /root/.cargo/env && cd /build \ 
+    && cargo update -p sctgdesk-api-server \
+    && DATABASE_URL=sqlite://$(pwd)/db_v2.sqlite3 cargo build --release
 RUN mkdir -p /build/ubuntu-jammy/bin \
     && cp /build/target/release/hbbr /build/ubuntu-jammy/bin/ \
     && cp /build/target/release/hbbs /build/ubuntu-jammy/bin/ \

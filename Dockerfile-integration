@@ -1,4 +1,5 @@
 FROM ubuntu:jammy as builder
+ENV NODE_VERSION=20.13.1
 RUN apt-get update && apt-get install -y curl build-essential debhelper devscripts pkg-config libssl-dev zip
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN mkdir /build
@@ -8,7 +9,9 @@ COPY Cargo.toml /build/Cargo.toml
 COPY Cargo.lock /build/Cargo.lock
 COPY build.rs /build/build.rs
 COPY db_v2.sqlite3 /build/db_v2.sqlite3
-RUN . /root/.cargo/env && cd /build \ 
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash \
+    && . /root/.nvm/nvm.sh && nvm install ${NODE_VERSION} && nvm use ${NODE_VERSION} \
+    && . /root/.cargo/env && cd /build \ 
     && cargo update -p sctgdesk-api-server \
     && DATABASE_URL=sqlite://$(pwd)/db_v2.sqlite3 cargo build --release
 RUN mkdir -p /build/ubuntu-jammy/bin \

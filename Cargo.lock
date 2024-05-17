@@ -1770,7 +1770,7 @@ dependencies = [
 
 [[package]]
 name = "hbbs"
-version = "1.1.99-16"
+version = "1.1.99-17"
 dependencies = [
  "async-speed-limit",
  "async-trait",
@@ -1988,7 +1988,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.4.10",
+ "socket2 0.5.7",
  "tokio",
  "tower-service",
  "tracing",
@@ -2104,6 +2104,25 @@ checksum = "634d9b1461af396cad843f47fdba5597a4f9e6ddd4bfb6ff5d85028c25cb12f6"
 dependencies = [
  "unicode-bidi",
  "unicode-normalization",
+]
+
+[[package]]
+name = "include_dir"
+version = "0.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "18762faeff7122e89e0857b02f7ce6fcc0d101d5e9ad2ad7846cc01d61b7f19e"
+dependencies = [
+ "include_dir_macros",
+]
+
+[[package]]
+name = "include_dir_macros"
+version = "0.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b139284b5cf57ecfa712bcc66950bb635b31aff41c188e8a4cfc758eca374a3f"
+dependencies = [
+ "proc-macro2 1.0.81",
+ "quote 1.0.36",
 ]
 
 [[package]]
@@ -2663,7 +2682,7 @@ dependencies = [
 [[package]]
 name = "oauth2"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#4b93f1636141d8145fc0d049517445b43f5548c4"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#5ce8c82e645a4589c848d480b01decd2a95ba48a"
 dependencies = [
  "base64 0.22.1",
  "log",
@@ -3609,7 +3628,7 @@ checksum = "e86697c916019a8588c99b5fac3cead74ec0b4b819707a682fd4d23fa0ce1ba1"
 [[package]]
 name = "s3software"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#4b93f1636141d8145fc0d049517445b43f5548c4"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#5ce8c82e645a4589c848d480b01decd2a95ba48a"
 dependencies = [
  "aws-config",
  "aws-sdk-s3",
@@ -3687,10 +3706,11 @@ dependencies = [
 [[package]]
 name = "sctgdesk-api-server"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#4b93f1636141d8145fc0d049517445b43f5548c4"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#5ce8c82e645a4589c848d480b01decd2a95ba48a"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
+ "include_dir",
  "log",
  "oauth2",
  "reqwest",
@@ -4089,7 +4109,7 @@ dependencies = [
 [[package]]
 name = "state"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#4b93f1636141d8145fc0d049517445b43f5548c4"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#5ce8c82e645a4589c848d480b01decd2a95ba48a"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
@@ -4823,7 +4843,7 @@ checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#4b93f1636141d8145fc0d049517445b43f5548c4"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#5ce8c82e645a4589c848d480b01decd2a95ba48a"
 dependencies = [
  "base64 0.22.1",
  "chrono",

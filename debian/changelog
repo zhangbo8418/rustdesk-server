@@ -1,3 +1,8 @@
+rustdesk-server (1.1.99-17) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * sctgdesk-api-server: add a stub for a webconsole at /ui
+  
 rustdesk-server (1.1.99-16) UNRELEASED; urgency=low
 
   * uodate sctgdesk-api-server

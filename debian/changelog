@@ -1,3 +1,9 @@
+rustdesk-server (1.1.99-18) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * create s3config.toml if needed
+  * create oauth2.toml if needed
+  
 rustdesk-server (1.1.99-17) UNRELEASED; urgency=low
 
   * update sctgdesk-api-server

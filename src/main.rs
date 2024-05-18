@@ -35,6 +35,7 @@ async fn start_rocket() -> ResultType<()> {
         .merge(("port", port))
         .merge(("log_level", get_rocket_log_level()))
         .merge(("secret_key", "wJq+s/xvwZjmMX3ev0p4gQTs9Ej5wt0brsk3ZGhoBTg="))
+        .merge(("ident",  format!("SCTGDeskServer/{}", env!("CARGO_PKG_VERSION"))))
         .merge(("limits", Limits::new().limit("json", 2.mebibytes())));
     let _rocket = build_rocket(figment).await.ignite().await?.launch().await;
     Ok(())

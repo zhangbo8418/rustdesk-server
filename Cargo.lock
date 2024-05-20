@@ -1770,7 +1770,7 @@ dependencies = [
 
 [[package]]
 name = "hbbs"
-version = "1.1.99-19"
+version = "1.1.99-20"
 dependencies = [
  "async-speed-limit",
  "async-trait",
@@ -1988,7 +1988,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.4.10",
+ "socket2 0.5.7",
  "tokio",
  "tower-service",
  "tracing",
@@ -2682,7 +2682,7 @@ dependencies = [
 [[package]]
 name = "oauth2"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#ab19017add06d3b6804d4979fd2f83b71a6f1caa"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#82a8975f55ecf11bed1b4848e6a5e3c2f15c9bdb"
 dependencies = [
  "base64 0.22.1",
  "log",
@@ -3628,7 +3628,7 @@ checksum = "e86697c916019a8588c99b5fac3cead74ec0b4b819707a682fd4d23fa0ce1ba1"
 [[package]]
 name = "s3software"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#ab19017add06d3b6804d4979fd2f83b71a6f1caa"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#82a8975f55ecf11bed1b4848e6a5e3c2f15c9bdb"
 dependencies = [
  "aws-config",
  "aws-sdk-s3",
@@ -3706,7 +3706,7 @@ dependencies = [
 [[package]]
 name = "sctgdesk-api-server"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#ab19017add06d3b6804d4979fd2f83b71a6f1caa"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#82a8975f55ecf11bed1b4848e6a5e3c2f15c9bdb"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
@@ -4109,7 +4109,7 @@ dependencies = [
 [[package]]
 name = "state"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#ab19017add06d3b6804d4979fd2f83b71a6f1caa"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#82a8975f55ecf11bed1b4848e6a5e3c2f15c9bdb"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
@@ -4843,7 +4843,7 @@ checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#ab19017add06d3b6804d4979fd2f83b71a6f1caa"
+source = "git+https://github.com/sctg-development/sctgdesk-api-server.git?branch=main#82a8975f55ecf11bed1b4848e6a5e3c2f15c9bdb"
 dependencies = [
  "base64 0.22.1",
  "chrono",

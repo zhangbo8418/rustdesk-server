@@ -1,3 +1,8 @@
+rustdesk-server (1.1.99-20) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * /api/peers is understood by client (but don't know what to display!)
+  
 rustdesk-server (1.1.99-19) UNRELEASED; urgency=low
 
   * update sctgdesk-api-server

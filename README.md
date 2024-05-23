@@ -16,9 +16,10 @@
 
 This is a modified version of RustDesk Server, which is free and open source.  
 
-The first difference is that this version includes the new *tcp* mode included in the RustDesk Server Pro version.  
-The second difference is that this version includes a preliminary implementation of the Rustdesk Server Pro API server.  
-The third difference is that this version includes a preliminary implementation of a simple webconsole.  
+* The first difference is that this version includes the new *tcp* mode included in the RustDesk Server Pro version.  
+* The second difference is that this version includes a preliminary implementation of the Rustdesk Server Pro API server.  
+* The third difference is that this version includes a preliminary implementation of a simple webconsole.  
+
 The webconsole is accessible at the address `http://<server-ip>:21114/`.  
 You can browse the API documentation in the builtins API server at the address `http://<server-ip>:21114/api/doc/`.  
 

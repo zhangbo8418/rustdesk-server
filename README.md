@@ -12,13 +12,23 @@
 
 [![build](https://github.com/sctg-development/sctgdesk-server/actions/workflows/multiarch-docker-hub.yml/badge.svg)](https://github.com/sctg-development/sctgdesk-server/actions/workflows/multiarch-docker-hub.yml)
 
-[**Download**](https://github.com/sctg-development/sctgdesk-server/releases)
+[**binary Download**](https://github.com/sctg-development/sctgdesk-server/releases)
 
 This is a modified version of RustDesk Server, which is free and open source.  
+
 The first difference is that this version includes the new *tcp* mode included in the RustDesk Server Pro version.  
 The second difference is that this version includes a preliminary implementation of the Rustdesk Server Pro API server.  
+The third difference is that this version includes a preliminary implementation of a simple webconsole.  
+The webconsole is accessible at the address `http://<server-ip>:21114/`.  
 You can browse the API documentation in the builtins API server at the address `http://<server-ip>:21114/api/doc/`.  
+
 A non interactive API documentation is available at [sctgdesk-api-server repo](https://sctg-development.github.io/sctgdesk-api-server/).
+
+## Standalone version
+
+The standalone version is a version of the server that includes the API server and the webconsole but not the rendez-vous server.   
+The standalone version is available in its own repository [sctgdesk-api-server](https://github.com/sctg-development/sctgdesk-api-server).
+For all api or webconsole related issues, please refer to the [sctgdesk-api-server](https://github.com/sctg-development/sctgdesk-api-server) repository.
 
 # RustDesk Server Program
 
@@ -35,7 +45,7 @@ Self-host your own RustDesk server, it is free and open source.
 ## How to build manually
 
 ```bash
-cargo build --release
+DATABASE_URL=sqlite://$(pwd)/db_v2.sqlite3 cargo build --release
 ```
 
 Three executables will be generated in target/release.

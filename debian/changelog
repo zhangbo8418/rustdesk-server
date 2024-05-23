@@ -1,3 +1,8 @@
+rustdesk-server (1.1.99-24) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * enable or disable user in webconsole
+  
 rustdesk-server (1.1.99-23) UNRELEASED; urgency=low
 
   * update sctgdesk-api-server

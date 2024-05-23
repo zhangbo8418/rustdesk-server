@@ -25,9 +25,9 @@ You can browse the API documentation in the builtins API server at the address `
 
 A non interactive API documentation is available at [sctgdesk-api-server repo](https://sctg-development.github.io/sctgdesk-api-server/).
 
-## Standalone version
+## API Standalone version
 
-The standalone version is a version of the server that includes the API server and the webconsole but not the rendez-vous server.   
+The api standalone version is a version of the server that includes the API server and the webconsole but not the rendez-vous server.   
 The standalone version is available in its own repository [sctgdesk-api-server](https://github.com/sctg-development/sctgdesk-api-server).
 For all api or webconsole related issues, please refer to the [sctgdesk-api-server](https://github.com/sctg-development/sctgdesk-api-server) repository.
 

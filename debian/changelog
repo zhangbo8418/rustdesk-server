@@ -1,3 +1,7 @@
+rustdesk-server (1.1.99-26) UNRELEASED; urgency=low
+
+  * oauth2 login in webconsole
+  
 rustdesk-server (1.1.99-25) UNRELEASED; urgency=low
 
   * personal address book in webconsole

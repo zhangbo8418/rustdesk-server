@@ -72,9 +72,9 @@ fn main() -> ResultType<()> {
         -a, --api-port=[NUMBER(default={API_PORT})] 'Sets the listening port of API server'
         -p, --port=[NUMBER(default={RENDEZVOUS_PORT})] 'Sets the listening port'
         -s, --serial=[NUMBER(default=0)] 'Sets configure update serial number'
-        -R, --rendezvous-servers=[HOSTS] 'Sets rendezvous servers, seperated by colon'
+        -R, --rendezvous-servers=[HOSTS] 'Sets rendezvous servers, separated by colon'
         -u, --software-url=[URL] 'Sets download url of RustDesk software of newest version'
-        -r, --relay-servers=[HOST] 'Sets the default relay servers, seperated by colon'
+        -r, --relay-servers=[HOST] 'Sets the default relay servers, separated by colon'
         -M, --rmem=[NUMBER(default={RMEM})] 'Sets UDP recv buffer size, set system rmem_max first, e.g., sudo sysctl -w net.core.rmem_max=52428800. vi /etc/sysctl.conf, net.core.rmem_max=52428800, sudo sysctl –p'
         , --mask=[MASK] 'Determine if the connection comes from LAN, e.g. 192.168.0.0/16'
         -k, --key=[KEY] 'Only allow the client with the same key'",
@@ -92,7 +92,7 @@ fn main() -> ResultType<()> {
         let _ = start_rocket();
     });
 
-    RendezvousServer::start(port, serial, &get_arg("key"), rmem)?;
+    RendezvousServer::start(port, serial, &get_arg_or("key", "-".to_owned()), rmem)?;
     let _ = rocket_thread.join();
     Ok(())
 }

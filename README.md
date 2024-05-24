@@ -77,6 +77,8 @@ Self-host your own RustDesk server, it is free and open source.
 
 ## How to build manually
 
+First you need to have a working Rust development toolchain and a Node ≥ 20 working installation.  
+
 ```bash
 DATABASE_URL=sqlite://$(pwd)/db_v2.sqlite3 cargo build --release
 ```

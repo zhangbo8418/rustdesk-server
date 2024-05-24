@@ -18,6 +18,11 @@ This is a modified version of RustDesk Server, which is free and open source.
 
 * The first difference is that this version includes the new *tcp* mode included in the RustDesk Server Pro version.  
 * The second difference is that this version includes a preliminary implementation of the Rustdesk Server Pro API server.  
+  * Support for personal address book
+  * Support for shared address book at group level
+    * read-only, read-write, admin (currently rules need to be set manually in the database)
+  * Support for shared address book at user level
+    * read-only, read-write, admin (currently rules need to be set manually in the database)
 * The third difference is that this version includes a preliminary implementation of a simple webconsole.  
 
 The webconsole is accessible at the address `http://<server-ip>:21114/`.  

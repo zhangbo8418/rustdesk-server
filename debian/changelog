@@ -1,3 +1,9 @@
+rustdesk-server (1.1.99-28) UNRELEASED; urgency=low
+
+  * propagate version
+  * better api documentation
+  * shared profiles support multiple rules
+  
 rustdesk-server (1.1.99-27) UNRELEASED; urgency=low
 
   * preliminary support for shared profiles

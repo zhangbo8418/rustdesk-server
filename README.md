@@ -12,7 +12,9 @@
 
 [![build](https://github.com/sctg-development/sctgdesk-server/actions/workflows/multiarch-docker-hub.yml/badge.svg)](https://github.com/sctg-development/sctgdesk-server/actions/workflows/multiarch-docker-hub.yml)
 
-[**binary Download**](https://github.com/sctg-development/sctgdesk-server/releases)
+[**Binary Download**](https://github.com/sctg-development/sctgdesk-server/releases)  
+
+[**API Documentation**](https://sctg-development.github.io/sctgdesk-api-server/)  
 
 This is a modified version of RustDesk Server, which is free and open source.  
 

@@ -64,6 +64,94 @@ For all api or webconsole related issues, please refer to the [sctgdesk-api-serv
 
 <img width="927" alt="Capture d’écran 2024-05-24 à 12 07 32" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/f447f5fa-bc77-4bc6-858a-c6cadf9b7f6c">
 
+# Security
+
+The embedded API server is not secured nor protected agains DDOS attacks. A good practice is to use a reverse proxy in front of the API server. NGINX is a good choice for this purpose. HAProxy is also a good choice.  
+We use HAProxy in front of the API server in our production environment.
+This is our configuration file for HAProxy it is provided as an example only. You should adapt it to your own needs.:
+
+```haproxy
+global
+    log /dev/log    local0
+    log /dev/log    local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log global
+    retries 2
+    timeout connect 3000ms
+    timeout server 5000ms
+    timeout client 5000ms
+
+frontend hbbs_wss
+    bind 0.0.0.0:21120 ssl crt /etc/haproxy/hbb.pem
+    default_backend hbbs_wss_backend
+
+frontend hbbs_api
+    mode http
+    option forwardfor
+    bind 0.0.0.0:21114 ssl crt /etc/haproxy/api.pem
+    http-request set-header X-Forwarded-Proto https
+    default_backend hbbs_api_backend
+
+frontend hbbs_api_443
+    mode http
+    option forwardfor
+    bind 0.0.0.0:443 ssl crt /etc/haproxy/api.pem
+    http-request set-header X-Forwarded-Proto https
+    filter compression
+    compression algo gzip
+    compression type text/css text/html text/javascript application/javascript text/plain text/xml application/json
+    compression offload
+    default_backend hbbs_api_backend
+
+frontend hbbr_wss
+    bind 0.0.0.0:21121 ssl crt /etc/haproxy/hbb.pem
+    default_backend hbbr_wss_backend
+
+backend hbbs_api_backend
+    mode http
+    server srv_main 127.0.0.1:21113
+
+backend hbbs_wss_backend
+    server srv_main 127.0.0.1:21118
+
+backend hbbr_wss_backend
+    server srv_main 127.0.0.1:21119
+```
+
+The hbbs server is launched with
+
+```service
+[Unit]
+Description=Rustdesk Signal Server
+
+[Service]
+Type=simple
+LimitNOFILE=1000000
+ExecStart=/usr/bin/hbbs --api-port=21113 -k AucFCOYVWNHRkJnx13FFh7C0tmUZ3nei5wXKmlfK6WPYthz65fRavaA5HO/OIz2kq+bCSlAqBkZgvikwVGqw/Q== --mask=10.10.0.235/24 -r rendez-vous.example.org -R rendez-vous.example.org
+#Environment="RUST_LOG=debug"
+Environment="ALWAYS_USE_RELAY=Y"
+Environment="OAUTH2_CREATE_USER=1"
+Environment="S3CONFIG_FILE=s3config.toml"
+Environment="OAUTH2_CONFIG_FILE=oauth2.toml"
+WorkingDirectory=/var/lib/rustdesk-server/
+User=
+Group=
+Restart=always
+StandardOutput=append:/var/log/rustdesk-server/hbbs.log
+StandardError=append:/var/log/rustdesk-server/hbbs.error
+# Restart service after 10 seconds if node service crashes
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
 
 # RustDesk Server Program
 

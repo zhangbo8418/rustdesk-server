@@ -43,7 +43,7 @@ pub struct Peer {
     pub pk: Vec<u8>,
     pub user: Option<Vec<u8>>,
     pub info: String,
-    pub status: Option<i64>,
+    pub status: i64,
 }
 
 impl Database {
@@ -96,7 +96,7 @@ impl Database {
     pub async fn get_peer(&self, id: &str) -> ResultType<Option<Peer>> {
         Ok(sqlx::query_as!(
             Peer,
-            "select guid, id, uuid, pk, user, status, info from peer where id = ?",
+            r#"select guid, id, uuid, pk, user, status, info as "info!: String" from peer where id = ?"#,
             id
         )
         .fetch_optional(self.pool.get().await?.deref_mut())

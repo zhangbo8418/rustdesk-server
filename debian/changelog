@@ -1,11 +1,133 @@
-rustdesk-server (1.1.11-1) UNRELEASED; urgency=medium
-  * set reuse port to make restart friendly
-  * revert hbbr `-k` to not ruin back-compatibility
+rustdesk-server (1.1.99-28) UNRELEASED; urgency=low
 
-rustdesk-server (1.1.11) UNRELEASED; urgency=medium
-  * change -k to default '-', so you need not to set -k any more
+  * propagate version
+  * better api documentation
+  * shared profiles support multiple rules
+  
+rustdesk-server (1.1.99-27) UNRELEASED; urgency=low
 
+  * preliminary support for shared profiles
+
+rustdesk-server (1.1.99-26) UNRELEASED; urgency=low
+
+  * oauth2 login in webconsole
+  
+rustdesk-server (1.1.99-25) UNRELEASED; urgency=low
+
+  * personal address book in webconsole
+  
+rustdesk-server (1.1.99-24) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * enable or disable user in webconsole
+  
+rustdesk-server (1.1.99-23) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * edit users in webconsole
+  * 
+rustdesk-server (1.1.99-22) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * groups in webconsole
+  
+rustdesk-server (1.1.99-21) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * add user from webconsole
+  
+rustdesk-server (1.1.99-20) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * /api/peers is understood by client (but don't know what to display!)
+  
+rustdesk-server (1.1.99-19) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * can see users in web console
+  
+rustdesk-server (1.1.99-18) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * create s3config.toml if needed
+  * create oauth2.toml if needed
+  
+rustdesk-server (1.1.99-17) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+  * sctgdesk-api-server: add a stub for a webconsole at /ui
+  
+rustdesk-server (1.1.99-16) UNRELEASED; urgency=low
+
+  * uodate sctgdesk-api-server
+  
+rustdesk-server (1.1.99-15) UNRELEASED; urgency=low
+
+  * oauth: add support for github
+  * bug: address book name must be unique
+  
+rustdesk-server (1.1.99-14) UNRELEASED; urgency=low
+
+  * oauth: use username from id_token if available
+  
+rustdesk-server (1.1.99-13) UNRELEASED; urgency=low
+
+  * Use main version package
+  
+rustdesk-server (1.1.99-12) UNRELEASED; urgency=low
+
+  * support S3 download URLs
+  
+rustdesk-server (1.1.99-11) UNRELEASED; urgency=low
+
+  * support more api
+  
+-- sctg <sctg@world.com>  Mon, 06 May 2024 18:01:00 +0800
+
+rustdesk-server (1.1.99-10) UNRELEASED; urgency=low
+
+  * update sctgdesk-api-server
+
+-- sctg <sctg@world.com>  Mon, 06 May 2024 07:09:00 +0800
+
+rustdesk-server (1.1.99-9) UNRELEASED; urgency=low
+
+  * use sctgdesk-api-server as a submodule
+
+-- sctg <sctg@world.com>  Sun, 05 May 2024 17:28:00 +0800
+
+rustdesk-server (1.1.99-8) UNRELEASED; urgency=low
+
+  * can select api port
+
+ -- sctg <sctg@world.com>  Sun, 05 May 2024 11:28:00 +0800
+
+rustdesk-server (1.1.99-7) UNRELEASED; urgency=high
+
+  * BUG: integrates sctgdesk-api-server
+
+ -- sctg <sctg@world.com>  Sun, 05 May 2024 11:22:00 +0800
+
+rustdesk-server (1.1.99-6) UNRELEASED; urgency=low
+
+  * integrates sctgdesk-api-server
+
+ -- sctg <sctg@world.com>  Sat, 04 May 2024 09:28:00 +0800
+  
+rustdesk-server (1.1.99-5) UNRELEASED; urgency=low
+
+  * makes db compatible with rustdesk-server-pro:1.3.1
+
+ -- sctg <sctg@world.com>  Sat, 15 Apr 2024 17:42:00 +0800
+  
+rustdesk-server (1.1.99-4) UNRELEASED; urgency=low
+
+  * allow tcp and ws protocol for register_pk
+
+ -- sctg <sctg@world.com>  Sat, 13 Apr 2024 17:08:00 +0800
+  
 rustdesk-server (1.1.10-3) UNRELEASED; urgency=medium
+
   * fix on -2
 
 rustdesk-server (1.1.10-2) UNRELEASED; urgency=medium

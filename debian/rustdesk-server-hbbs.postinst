@@ -10,6 +10,75 @@ fi
 case "$1" in
     configure|abort-upgrade|abort-deconfigure|abort-remove)
       mkdir -p /var/lib/rustdesk-server/
+	  # if /var/lib/rustdesk-server/oauth2.toml does not exist, create it
+	  if [ ! -f /var/lib/rustdesk-server/oauth2.toml ]; then
+		cat > /var/lib/rustdesk-server/oauth2.toml <<EOF
+# [[provider]]
+# provider = "Gitlab"
+# authorization_url = "https://gitlab.com/oauth/authorize"
+# token_exchange_url = "https://gitlab.com/oauth/token"
+# app_id = "your_gitlab_app_id"
+# app_secret = "your_gitlab_app_secret"
+# scope = "read_user"
+# op_auth_string = "oidc/gitlab"
+# op = "gitlab"
+
+# [[provider]]
+# provider = "Google"
+# authorization_url = "https://accounts.google.com/o/oauth2/v2/auth"
+# token_exchange_url = "https://oauth2.googleapis.com/token"
+# app_id = "your_google_app_id"
+# app_secret = "your_google_app_secret"
+# scope = "openid email profile"
+# op_auth_string = "oidc/google"
+# op = "google"
+
+# [[provider]]
+# provider = "Facebook"
+# authorization_url = "https://www.facebook.com/v13.0/dialog/oauth"
+# token_exchange_url = "https://graph.facebook.com/v13.0/oauth/access_token"
+# app_id = "your_facebook_app_id"
+# app_secret = "your_facebook_app_secret"
+# scope = "public_profile"
+# op_auth_string = "oidc/facebook"
+# op = "facebook"
+
+[[provider]]
+provider = "Github"
+authorization_url = "https://github.com/login/oauth/authorize"
+token_exchange_url = "https://github.com/login/oauth/access_token"
+app_id = "your_github_app_id"
+app_secret = "your_github_app_secret"
+scope = "read:user user:email"
+op_auth_string = "oidc/github"
+op = "github"
+
+[[provider]]
+provider = "Dex"
+authorization_url = "https://dex-mock-server.example.org/dex/auth"
+token_exchange_url = "https://dex-mock-server.example.org/dex/token"
+app_id = "sctgdesk-api-server"
+app_secret = "appsecret"
+op_auth_string = "oidc/dex"
+op = "dex"
+scope = "openid email profile"
+EOF
+	  fi
+	  if [ ! -f /var/lib/rustdesk-server/s3config.toml ]; then
+		cat > /var/lib/rustdesk-server/s3config.toml <<EOF
+[s3config]
+Endpoint = "https://compat.objectstorage.eu-london-1.oraclecloud.com"
+Region = "eu-london-1"
+AccessKey = "c324ead11faa0d87337c07ddc4a1129fab76188d"
+SecretKey = "GJurV55f/LD36kjZFpchZMj/uvgTqxHyFkBchUUa8KA="
+Bucket = "aezoz24elapn"
+Windows64Key = "master/sctgdesk-releases/sctgdesk-1.2.4-x86_64.exe"
+Windows32Key = "master/sctgdesk-releases/sctgdesk-1.2.4-i686.exe"
+OSXKey = "master/sctgdesk-releases/sctgdesk-1.2.4.dmg"
+OSXArm64Key = "master/sctgdesk-releases/sctgdesk-1.2.4.dmg"
+IOSKey = "master/sctgdesk-releases/sctgdesk-1.2.4.ipa"
+EOF
+	  fi
 	  deb-systemd-helper unmask "${SERVICE}" >/dev/null || true
 	  if deb-systemd-helper --quiet was-enabled "${SERVICE}"; then
 	  	deb-systemd-invoke enable "${SERVICE}" >/dev/null || true

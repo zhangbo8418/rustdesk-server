@@ -8,6 +8,151 @@
   [<a href="README-DE.md">Deutsch</a>] | [<a href="README-NL.md">Nederlands</a>] | [<a href="README-TW.md">繁體中文</a>] | [<a href="README-ZH.md">简体中文</a>]<br>
 </p>
 
+# SctgDesk Server Program
+
+[![build](https://github.com/sctg-development/sctgdesk-server/actions/workflows/multiarch-docker-hub.yml/badge.svg)](https://github.com/sctg-development/sctgdesk-server/actions/workflows/multiarch-docker-hub.yml)
+
+[**Binary Download**](https://github.com/sctg-development/sctgdesk-server/releases)  
+
+[**API Documentation**](https://sctg-development.github.io/sctgdesk-api-server/)  
+
+This is a modified version of RustDesk Server, which is free and open source.  
+
+* The first difference is that this version includes the new *tcp* mode included in the RustDesk Server Pro version.  
+* The second difference is that this version includes a preliminary implementation of the Rustdesk Server Pro API server.  
+  * Support for personal address book
+  * Support for shared address book at group level
+    * read-only, read-write, admin (currently rules need to be set manually in the database)
+  * Support for shared address book at user level
+    * read-only, read-write, admin (currently rules need to be set manually in the database)
+* The third difference is that this version includes a preliminary implementation of a simple webconsole.  
+
+The webconsole is accessible at the address `http://<server-ip>:21114/`.  
+You can browse the API documentation in the builtins API server at the address `http://<server-ip>:21114/api/doc/`.  
+
+A non interactive API documentation is available at [sctgdesk-api-server repo](https://sctg-development.github.io/sctgdesk-api-server/).
+
+## API Standalone version
+
+The api standalone version is a version of the server that includes the API server and the webconsole but not the rendez-vous server.   
+The standalone version is available in its own repository [sctgdesk-api-server](https://github.com/sctg-development/sctgdesk-api-server).
+For all api or webconsole related issues, please refer to the [sctgdesk-api-server](https://github.com/sctg-development/sctgdesk-api-server) repository.
+
+## Screenshots
+
+### Webconsole
+
+<img width="1085" alt="Capture d’écran 2024-05-24 à 11 48 13" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/fe72a374-8a98-4606-8632-3d919f9317c9">
+
+<img width="1085" alt="Capture d’écran 2024-05-24 à 11 48 34" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/6ae55861-f65c-4950-a068-f22eef3ad81a">
+
+<img width="1084" alt="Capture d’écran 2024-05-24 à 11 48 44" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/8d225841-43f5-44f4-8d41-5b6ca3324096">
+
+<img width="1087" alt="Capture d’écran 2024-05-24 à 11 48 56" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/d84ce3d3-1d19-4765-883f-001f313a4a1e">
+
+<img width="1089" alt="Capture d’écran 2024-05-24 à 11 49 13" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/db13010b-077a-4e14-943b-9d8de3266f82">
+
+### Api documentation
+
+<img width="1502" alt="apidoc" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/88fe7910-fe62-43e5-a16c-70dc1201e040">
+
+### Use in Rustdesk client
+
+<img width="913" alt="Capture d’écran 2024-05-24 à 12 14 34" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/1b253577-dce2-4163-9a49-ba4b3da37812">
+
+<img width="923" alt="Capture d’écran 2024-05-24 à 12 07 21" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/c49b3aba-b13f-4b15-a69c-d492a90e774a">
+
+<img width="927" alt="Capture d’écran 2024-05-24 à 12 07 32" src="https://github.com/sctg-development/sctgdesk-server/assets/165936401/f447f5fa-bc77-4bc6-858a-c6cadf9b7f6c">
+
+# Security
+
+The embedded API server is not secured nor protected agains DDOS attacks. A good practice is to use a reverse proxy in front of the API server. NGINX is a good choice for this purpose. HAProxy is also a good choice.  
+We use HAProxy in front of the API server in our production environment.
+This is our configuration file for HAProxy it is provided as an example only. You should adapt it to your own needs.:
+
+```haproxy
+global
+    log /dev/log    local0
+    log /dev/log    local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log global
+    retries 2
+    timeout connect 3000ms
+    timeout server 5000ms
+    timeout client 5000ms
+
+frontend hbbs_wss
+    bind 0.0.0.0:21120 ssl crt /etc/haproxy/hbb.pem
+    default_backend hbbs_wss_backend
+
+frontend hbbs_api
+    mode http
+    option forwardfor
+    bind 0.0.0.0:21114 ssl crt /etc/haproxy/api.pem
+    http-request set-header X-Forwarded-Proto https
+    default_backend hbbs_api_backend
+
+frontend hbbs_api_443
+    mode http
+    option forwardfor
+    bind 0.0.0.0:443 ssl crt /etc/haproxy/api.pem
+    http-request set-header X-Forwarded-Proto https
+    filter compression
+    compression algo gzip
+    compression type text/css text/html text/javascript application/javascript text/plain text/xml application/json
+    compression offload
+    default_backend hbbs_api_backend
+
+frontend hbbr_wss
+    bind 0.0.0.0:21121 ssl crt /etc/haproxy/hbb.pem
+    default_backend hbbr_wss_backend
+
+backend hbbs_api_backend
+    mode http
+    server srv_main 127.0.0.1:21113
+
+backend hbbs_wss_backend
+    server srv_main 127.0.0.1:21118
+
+backend hbbr_wss_backend
+    server srv_main 127.0.0.1:21119
+```
+
+The hbbs server is launched with
+
+```service
+[Unit]
+Description=Rustdesk Signal Server
+
+[Service]
+Type=simple
+LimitNOFILE=1000000
+ExecStart=/usr/bin/hbbs --api-port=21113 -k AucFCOYVWNHRkJnx13FFh7C0tmUZ3nei5wXKmlfK6WPYthz65fRavaA5HO/OIz2kq+bCSlAqBkZgvikwVGqw/Q== --mask=10.10.0.235/24 -r rendez-vous.example.org -R rendez-vous.example.org
+#Environment="RUST_LOG=debug"
+Environment="ALWAYS_USE_RELAY=Y"
+Environment="OAUTH2_CREATE_USER=1"
+Environment="S3CONFIG_FILE=s3config.toml"
+Environment="OAUTH2_CONFIG_FILE=oauth2.toml"
+WorkingDirectory=/var/lib/rustdesk-server/
+User=
+Group=
+Restart=always
+StandardOutput=append:/var/log/rustdesk-server/hbbs.log
+StandardError=append:/var/log/rustdesk-server/hbbs.error
+# Restart service after 10 seconds if node service crashes
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
 # RustDesk Server Program
 
 [![build](https://github.com/rustdesk/rustdesk-server/actions/workflows/build.yaml/badge.svg)](https://github.com/rustdesk/rustdesk-server/actions/workflows/build.yaml)
@@ -22,13 +167,15 @@ Self-host your own RustDesk server, it is free and open source.
 
 ## How to build manually
 
+First you need to have a working Rust development toolchain and a Node ≥ 20 working installation.  
+
 ```bash
-cargo build --release
+DATABASE_URL=sqlite://$(pwd)/db_v2.sqlite3 cargo build --release
 ```
 
 Three executables will be generated in target/release.
 
-- hbbs - RustDesk ID/Rendezvous server
+- hbbs - RustDesk ID/Rendezvous server with API server
 - hbbr - RustDesk relay server
 - rustdesk-utils - RustDesk CLI utilities
 
@@ -63,7 +210,7 @@ or without `--net=host`, but P2P direct connection can not work.
 For systems using SELinux, replacing `/root` by `/root:z` is required for the containers to run correctly. Alternatively, SELinux container separation can be disabled completely adding the option `--security-opt label=disable`.
 
 ```bash
-docker run --name hbbs -p 21115:21115 -p 21116:21116 -p 21116:21116/udp -p 21118:21118 -v "$PWD/data:/root" -d rustdesk/rustdesk-server:latest hbbs -r <relay-server-ip[:port]> 
+docker run --name hbbs -p 21114:21114 -p 21115:21115 -p 21116:21116 -p 21116:21116/udp -p 21118:21118 -v "$PWD/data:/root" -d rustdesk/rustdesk-server:latest hbbs -r <relay-server-ip[:port]> 
 docker run --name hbbr -p 21117:21117 -p 21119:21119 -v "$PWD/data:/root" -d rustdesk/rustdesk-server:latest hbbr 
 ```
 
@@ -82,6 +229,7 @@ services:
   hbbs:
     container_name: hbbs
     ports:
+      - 21115:21115
       - 21115:21115
       - 21116:21116
       - 21116:21116/udp

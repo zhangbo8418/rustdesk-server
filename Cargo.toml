@@ -1,7 +1,7 @@
 [package]
 name = "hbbs"
-version = "1.1.11-1"
-authors = ["rustdesk <info@rustdesk.com>"]
+version = "1.1.99-28"
+authors = ["rustdesk <info@rustdesk.com>", "sctg <sctgdesk@k-cloud.pp.ua>"]
 edition = "2021"
 build = "build.rs"
 default-run = "hbbs"
@@ -51,6 +51,9 @@ ipnetwork = "0.20"
 local-ip-address = "0.5.1"
 dns-lookup = "1.0.8"
 ping = "0.4.0"
+sctgdesk-api-server = { git = "https://github.com/sctg-development/sctgdesk-api-server.git", branch = "main" }
+# sctgdesk-api-server = { path = "../sctgdesk-api-server" }
+rocket = { version = "0.5", features = ["json", "secrets"] }
 
 [build-dependencies]
 hbb_common = { path = "libs/hbb_common" }

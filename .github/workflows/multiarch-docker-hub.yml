@@ -1,0 +1,129 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third party and are governed by
+# separate terms of service, privacy policy, and support.
+# Online documentation.
+
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you must update the SHA.
+# You can also reference a tag or a branch, but the action can change without warning.
+
+name: Publish amd64/arm64 to docker Hub
+on:
+  release:
+    types: [published]
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: 'arm64'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Extract metadata (tags, labels) for Docker integration image
+        id: metaintegration
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_IMAGE }}-integration
+        
+      - name: Build and push Docker integration image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile-integration
+          platforms: linux/arm64, linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: ${{ steps.metaintegration.outputs.tags }}
+          labels: ${{ steps.metaintegration.outputs.labels }}
+
+      - name: Pull and extract files from Docker image (amd64)
+        continue-on-error: true
+        run: |
+          export TAG=${{ github.event.release.tag_name }}
+          mkdir -p /tmp/amd64/zip
+          docker pull ${{ secrets.DOCKER_IMAGE }}-integration:latest
+          docker create --platform linux/amd64 --name temp-container-amd64 ${{ secrets.DOCKER_IMAGE }}-integration:latest
+          docker cp temp-container-amd64:/usr/local/share/debpackages/rustdesk-server-hbbr_${{ github.event.release.tag_name }}_amd64.deb /tmp/amd64/
+          docker cp temp-container-amd64:/usr/local/share/debpackages/rustdesk-server-hbbs_${{ github.event.release.tag_name }}_amd64.deb /tmp/amd64/
+          docker cp temp-container-amd64:/usr/local/share/debpackages/rustdesk-server-utils_${{ github.event.release.tag_name }}_amd64.deb /tmp/amd64/
+          docker cp temp-container-amd64:/usr/local/bin/hbbs /tmp/amd64/zip/
+          docker cp temp-container-amd64:/usr/local/bin/hbbr /tmp/amd64/zip/
+          docker cp temp-container-amd64:/usr/local/bin/rustdesk-utils /tmp/amd64/zip/
+          docker rm temp-container-amd64
+          cd /tmp/amd64/zip
+          zip -r /tmp/amd64/linux-ubuntu-22.04_${{ github.event.release.tag_name }}_amd64.zip .
+
+      - name: Pull and extract files from Docker image (arm64)
+        continue-on-error: true
+        run: |
+          export TAG=${{ github.event.release.tag_name }}
+          mkdir -p /tmp/arm64/zip
+          docker pull ${{ secrets.DOCKER_IMAGE }}-integration:latest
+          docker create --platform linux/arm64 --name temp-container-arm64 ${{ secrets.DOCKER_IMAGE }}-integration:latest
+          docker cp temp-container-arm64:/usr/local/share/debpackages/rustdesk-server-hbbr_${{ github.event.release.tag_name }}_arm64.deb /tmp/arm64/
+          docker cp temp-container-arm64:/usr/local/share/debpackages/rustdesk-server-hbbs_${{ github.event.release.tag_name }}_arm64.deb /tmp/arm64/
+          docker cp temp-container-arm64:/usr/local/share/debpackages/rustdesk-server-utils_${{ github.event.release.tag_name }}_arm64.deb /tmp/arm64/
+          docker cp temp-container-arm64:/usr/local/bin/hbbs /tmp/arm64/zip/
+          docker cp temp-container-arm64:/usr/local/bin/hbbr /tmp/arm64/zip/
+          docker cp temp-container-arm64:/usr/local/bin/rustdesk-utils /tmp/arm64/zip/
+          docker rm temp-container-arm64
+          cd /tmp/arm64/zip
+          zip -r /tmp/arm64/linux-ubuntu-22.04_${{ github.event.release.tag_name }}_arm64.zip .
+
+      - name: Upload Release Assets binaries for Ubuntu 22.04 arm64
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        with:
+          files: |
+            /tmp/arm64/linux-ubuntu-22.04_${{ github.event.release.tag_name }}_arm64.zip
+            /tmp/arm64/rustdesk-server-hbbr_${{ github.event.release.tag_name }}_arm64.deb
+            /tmp/arm64/rustdesk-server-hbbs_${{ github.event.release.tag_name }}_arm64.deb
+            /tmp/arm64/rustdesk-server-utils_${{ github.event.release.tag_name }}_arm64.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets binaries for Ubuntu 22.04 amd64
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        with:
+          files: |
+            /tmp/amd64/linux-ubuntu-22.04_${{ github.event.release.tag_name }}_amd64.zip
+            /tmp/amd64/rustdesk-server-hbbr_${{ github.event.release.tag_name }}_amd64.deb
+            /tmp/amd64/rustdesk-server-hbbs_${{ github.event.release.tag_name }}_amd64.deb
+            /tmp/amd64/rustdesk-server-utils_${{ github.event.release.tag_name }}_amd64.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker integration image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_IMAGE }}
+          
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/arm64, linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

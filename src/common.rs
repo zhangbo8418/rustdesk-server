@@ -106,7 +106,7 @@ pub fn now() -> u64 {
 }
 
 pub fn gen_sk(wait: u64) -> (String, Option<sign::SecretKey>) {
-    let sk_file = "id_ed25519";
+    let sk_file = "data/id_ed25519";
     if wait > 0 && !std::path::Path::new(sk_file).exists() {
         std::thread::sleep(std::time::Duration::from_millis(wait));
     }

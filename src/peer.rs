@@ -79,6 +79,14 @@ impl PeerMap {
             {
                 db = format!("./{db}");
             }
+
+            let data_dir = Path::new("data");
+            if !data_dir.exists() {
+                fs::create_dir(data_dir).unwrap_or_else(|err| {
+                    log::error!("Failed to create data directory: {}", err);
+                });
+            }
+
             db
         });
         log::info!("DB_URL={}", db);

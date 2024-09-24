@@ -72,7 +72,7 @@ impl PeerMap {
             #[cfg(all(windows, not(debug_assertions)))]
             {
                 if let Some(path) = hbb_common::config::Config::icon_path().parent() {
-                    db = format!("{}\\{}", path.to_str().unwrap_or("."), db);
+                    db = format!("{}\\data\\{}", path.to_str().unwrap_or("."), db);
                 }
             }
             #[cfg(not(windows))]

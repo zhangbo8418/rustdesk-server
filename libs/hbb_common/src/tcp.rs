@@ -191,9 +191,7 @@ impl FramedStream {
     #[inline]
     pub async fn send_raw(&mut self, msg: Vec<u8>) -> ResultType<()> {
         let mut msg = msg;
-        log::debug!("Send message: {:?}", msg);
         if let Some(key) = self.2.as_mut() {
-            log::debug!("Encrypting message");
             msg = key.enc(&msg);
         }
         self.send_bytes(bytes::Bytes::from(msg)).await?;

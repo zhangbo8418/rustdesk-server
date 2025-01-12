@@ -1,3 +1,8 @@
+rustdesk-server (1.1.13) UNRELEASED; urgency=medium
+  * add KeyExchange
+  * fix ws query online
+  * add Must Login
+
 rustdesk-server (1.1.12) UNRELEASED; urgency=medium
   * WS real ip
   * Bump s6-overlay to v3.2.0.0 and fix env warnings

@@ -602,6 +602,27 @@ impl RendezvousServer {
                         }
                     }
                 }
+                Some(rendezvous_message::Union::OnlineRequest(or)) => {
+                    let mut states = BytesMut::zeroed((or.peers.len() + 7) / 8);
+                    for (i, peer_id) in or.peers.iter().enumerate() {
+                        if let Some(peer) = self.pm.get_in_memory(peer_id).await {
+                            let elapsed = peer.read().await.last_reg_time.elapsed().as_millis() as i32;
+                            // bytes index from left to right
+                            let states_idx = i / 8;
+                            let bit_idx = 7 - i % 8;
+                            if elapsed < REG_TIMEOUT {
+                                states[states_idx] |= 0x01 << bit_idx;
+                            }
+                        }
+                    }
+
+                    let mut msg_out = RendezvousMessage::new();
+                    msg_out.set_online_response(OnlineResponse {
+                        states: states.into(),
+                        ..Default::default()
+                    });
+                    Self::send_to_sink(sink, msg_out).await;
+                }
                 _ => {}
             }
         }

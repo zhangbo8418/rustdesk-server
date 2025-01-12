@@ -184,7 +184,7 @@ jobs:
             ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-amd64,
             ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-arm64v8,
             ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-armv7,
-            ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-i386
+#            ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-i386
           push: true
 
       # Create and push manifest for :latest tag
@@ -196,7 +196,7 @@ jobs:
             ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-amd64,
             ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-arm64v8,
             ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-armv7,
-            ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-i386
+#            ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-i386
           push: true
 
   # Build and push single-arch Docker images to ghcr.io
@@ -229,7 +229,7 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -240,7 +240,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5

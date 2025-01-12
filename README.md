@@ -7,6 +7,7 @@
 
 - 解决当客户端登录了`Api`账号时链接超时的问题
 - s6镜像添加了`Api`支持，`Api`开源地址 https://github.com/lejianwen/rustdesk-api
+- 是否必须登录才能链接， `MUST_LOGIN` 默认为 `N`，设置为 `Y` 则必须登录才能链接
 
 ## docker镜像地址
 
@@ -30,6 +31,7 @@
      environment:
        - RELAY=<relay_server[:port]>
        - ENCRYPTED_ONLY=1
+       - MUST_LOGIN=N
        - TZ=Asia/Shanghai
        - RUSTDESK_API_RUSTDESK_ID_SERVER=<id_server[:21116]>
        - RUSTDESK_API_RUSTDESK_RELAY_SERVER=<relay_server[:21117]>

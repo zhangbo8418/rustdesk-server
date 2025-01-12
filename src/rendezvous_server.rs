@@ -71,6 +71,7 @@ static ROTATION_RELAY_SERVER: AtomicUsize = AtomicUsize::new(0);
 type RelayServers = Vec<String>;
 const CHECK_RELAY_TIMEOUT: u64 = 3_000;
 static ALWAYS_USE_RELAY: AtomicBool = AtomicBool::new(false);
+static MUST_LOGIN: AtomicBool = AtomicBool::new(false);
 
 #[derive(Clone)]
 struct Inner {
@@ -170,6 +171,25 @@ impl RendezvousServer {
         log::info!(
             "ALWAYS_USE_RELAY={}",
             if ALWAYS_USE_RELAY.load(Ordering::SeqCst) {
+                "Y"
+            } else {
+                "N"
+            }
+        );
+
+        let must_login = get_arg("must-login");
+        log::debug!("must_login={}", must_login);
+        if must_login.to_uppercase() == "Y" ||
+            (must_login == "" && std::env::var("MUST_LOGIN")
+            .unwrap_or_default()
+            .to_uppercase()
+            == "Y") {
+            MUST_LOGIN.store(true, Ordering::SeqCst);
+        }
+
+        log::info!(
+            "MUST_LOGIN={}",
+            if MUST_LOGIN.load(Ordering::SeqCst) {
                 "Y"
             } else {
                 "N"
@@ -756,6 +776,15 @@ impl RendezvousServer {
             });
             return Ok((msg_out, None));
         }
+        // Todo check token by jwt
+        if ph.token.is_empty() && MUST_LOGIN.load(Ordering::SeqCst) {
+            let mut msg_out = RendezvousMessage::new();
+            msg_out.set_punch_hole_response(PunchHoleResponse {
+                other_failure: String::from("Connection failed, please login first"),
+                ..Default::default()
+            });
+            return Ok((msg_out, None));
+        }
         let id = ph.id;
         // punch hole request from A, relay to B,
         // check if in same intranet first,
@@ -988,13 +1017,14 @@ impl RendezvousServer {
         match fds.next() {
             Some("h") => {
                 res = format!(
-                    "{}\n{}\n{}\n{}\n{}\n{}\n",
+                    "{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
                     "relay-servers(rs) <separated by ,>",
                     "reload-geo(rg)",
                     "ip-blocker(ib) [<ip>|<number>] [-]",
                     "ip-changes(ic) [<id>|<number>] [-]",
-                    "always-use-relay(aur)",
-                    "test-geo(tg) <ip1> <ip2>"
+                    "always-use-relay(aur) [Y|N]",
+                    "test-geo(tg) <ip1> <ip2>",
+                    "must-login(ml) [Y|N]",
                 )
             }
             Some("relay-servers" | "rs") => {
@@ -1119,6 +1149,21 @@ impl RendezvousServer {
                             res = format!("{:?}", self.get_relay_server(a, a));
                         }
                     }
+                }
+            }
+            Some("must-login" | "ml") => {
+                if let Some(rs) = fds.next() {
+                    if rs.to_uppercase() == "Y" {
+                        MUST_LOGIN.store(true, Ordering::SeqCst);
+                    } else {
+                        MUST_LOGIN.store(false, Ordering::SeqCst);
+                    }
+                } else {
+                    let _ = writeln!(
+                        res,
+                        "MUST_LOGIN: {:?}",
+                        MUST_LOGIN.load(Ordering::SeqCst)
+                    );
                 }
             }
             _ => {}

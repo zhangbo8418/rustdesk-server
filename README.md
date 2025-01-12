@@ -48,7 +48,15 @@
 
 - 普通镜像 [lejianwen/rustdesk-server](https://hub.docker.com/r/lejianwen/rustdesk-server)
 
+
+# API功能截图
+
 ![Api.png](./readme/api.png)
+
+更多查看 [RustDesk Api](https://github.com/lejianwen/rustdesk-api)
+
+
+--- 
 
 <p align="center">
   <a href="#如何自行构建">自行构建</a> •

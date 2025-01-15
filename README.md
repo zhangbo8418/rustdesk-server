@@ -55,6 +55,8 @@
 
 ![Api.png](./readme/api.png)
 
+![commnd.png](./readme/command_simple.png)
+
 更多查看 [RustDesk Api](https://github.com/lejianwen/rustdesk-api)
 
 

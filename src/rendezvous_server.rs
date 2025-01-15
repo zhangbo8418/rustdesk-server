@@ -46,6 +46,7 @@ use std::{
     sync::Arc,
     time::Instant,
 };
+use crate::jwt;
 
 #[derive(Clone, Debug)]
 enum Data {
@@ -776,14 +777,28 @@ impl RendezvousServer {
             });
             return Ok((msg_out, None));
         }
-        // Todo check token by jwt
-        if ph.token.is_empty() && MUST_LOGIN.load(Ordering::SeqCst) {
-            let mut msg_out = RendezvousMessage::new();
-            msg_out.set_punch_hole_response(PunchHoleResponse {
-                other_failure: String::from("Connection failed, please login first"),
-                ..Default::default()
-            });
-            return Ok((msg_out, None));
+        // if secret is not empty check token by jwt
+        if MUST_LOGIN.load(Ordering::SeqCst) {
+            if ph.token.is_empty() {
+                let mut msg_out = RendezvousMessage::new();
+                msg_out.set_punch_hole_response(PunchHoleResponse {
+                    other_failure: String::from("Connection failed, please login!"),
+                    ..Default::default()
+                });
+                return Ok((msg_out, None));
+            } else if !jwt::SECRET.is_empty() {
+                let token = ph.token;
+                let token = jwt::verify_token(token.as_str());
+                if token.is_err() {
+                    let mut msg_out = RendezvousMessage::new();
+                    msg_out.set_punch_hole_response(PunchHoleResponse {
+                        //提示重新登录
+                        other_failure: String::from("Token error, please log out and log back in!"),
+                        ..Default::default()
+                    });
+                    return Ok((msg_out, None));
+                }
+            }
         }
         let id = ph.id;
         // punch hole request from A, relay to B,

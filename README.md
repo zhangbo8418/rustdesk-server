@@ -37,10 +37,11 @@
        - RUSTDESK_API_RUSTDESK_ID_SERVER=<id_server[:21116]>
        - RUSTDESK_API_RUSTDESK_RELAY_SERVER=<relay_server[:21117]>
        - RUSTDESK_API_RUSTDESK_API_SERVER=http://<api_server[:21114]>
+       - RUSTDESK_API_KEY_FILE=/data/id_ed25519.pub
+       - RUSTDESK_API_JWT_KEY=xxxxxx # jwt key
      volumes:
        - /data/rustdesk/server:/data
        - /data/rustdesk/api:/app/data #将数据库挂载
-       - /data/rustdesk/server:/app/conf/data #挂载key文件到api容器，可以不用使用 RUSTDESK_API_RUSTDESK_KEY
      networks:
        - rustdesk-net
      restart: unless-stopped

@@ -1,7 +1,10 @@
-rustdesk-server (1.1.13) UNRELEASED; urgency=medium
+rustdesk-server (1.1.14) UNRELEASED; urgency=medium
   * add KeyExchange
   * fix ws query online
   * add Must Login
+
+rustdesk-server (1.1.13) UNRELEASED; urgency=medium
+  * Version check and refactor hbb_common to share with rustdesk client
 
 rustdesk-server (1.1.12) UNRELEASED; urgency=medium
   * WS real ip

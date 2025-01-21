@@ -283,7 +283,7 @@ jobs:
   # docker build and push of multiarch images
   docker-manifest:
 
-    name: Docker manifest
+    name: Docker manifest s6
     needs: docker
     runs-on: ubuntu-22.04
 
@@ -346,7 +346,7 @@ jobs:
   # docker build and push of single-arch images
   docker-classic:
 
-    name: Docker push - ${{ matrix.job.name }}
+    name: Docker push classic - ${{ matrix.job.name }}
     needs: build
     runs-on: ubuntu-22.04
     strategy:
@@ -416,7 +416,7 @@ jobs:
   # docker build and push of multiarch images
   docker-manifest-classic:
 
-    name: Docker manifest
+    name: Docker manifest classic
     needs: docker
     runs-on: ubuntu-22.04
     steps:

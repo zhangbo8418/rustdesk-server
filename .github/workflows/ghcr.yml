@@ -72,7 +72,7 @@ jobs:
   
   # Build and push single-arch Docker images to ghcr.io
   create-s6-overlay-images:
-    name: Docker push - ${{ matrix.job.name }}
+    name: Docker push s6-overlay - ${{ matrix.job.name }}
     needs: build
     runs-on: ubuntu-24.04
     strategy:
@@ -205,7 +205,7 @@ jobs:
 
   # Build and push single-arch Docker images to ghcr.io
   create-classic-images:
-    name: Docker push - ${{ matrix.job.name }}
+    name: Docker push classic - ${{ matrix.job.name }}
     needs: build
     runs-on: ubuntu-24.04
     strategy:

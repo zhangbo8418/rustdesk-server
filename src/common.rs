@@ -9,6 +9,8 @@ use std::{
     io::Read,
     net::SocketAddr,
     time::{Instant, SystemTime},
+    path::Path,
+    fs,
 };
 
 #[allow(dead_code)]
@@ -105,7 +107,13 @@ pub fn now() -> u64 {
 }
 
 pub fn gen_sk(wait: u64) -> (String, Option<sign::SecretKey>) {
-    let sk_file = "id_ed25519";
+    let sk_file = "data/id_ed25519";
+    let sk_dir = "data";
+
+    if let Err(e) = std::fs::create_dir_all(sk_dir) {
+        println!("Fatal error: unable to create directory {sk_dir}. Error: {e}");
+        std::process::exit(1);
+    }
     if wait > 0 && !std::path::Path::new(sk_file).exists() {
         std::thread::sleep(std::time::Duration::from_millis(wait));
     }

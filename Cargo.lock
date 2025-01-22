@@ -342,6 +342,7 @@ dependencies = [
  "iana-time-zone",
  "js-sys",
  "num-traits",
+ "serde",
  "wasm-bindgen",
  "windows-targets 0.52.6",
 ]
@@ -1068,7 +1069,7 @@ dependencies = [
 
 [[package]]
 name = "hbbs"
-version = "1.1.13"
+version = "1.1.14"
 dependencies = [
  "async-speed-limit",
  "async-trait",

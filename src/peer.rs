@@ -88,6 +88,7 @@ impl PeerMap {
                     log::error!("Failed to create data directory: {}", err);
                 });
             }
+
             db
         });
         log::info!("DB_URL={}", db);

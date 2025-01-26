@@ -9,6 +9,8 @@ use std::{
     io::Read,
     net::SocketAddr,
     time::{Instant, SystemTime},
+    path::Path,
+    fs,
 };
 
 #[allow(dead_code)]
@@ -105,7 +107,14 @@ pub fn now() -> u64 {
 }
 
 pub fn gen_sk(wait: u64) -> (String, Option<sign::SecretKey>) {
-    let sk_file = "id_ed25519";
+    let sk_file = "data/id_ed25519";
+    let sk_dir = "data";
+
+    if let Err(e) = std::fs::create_dir_all(sk_dir) {
+        println!("Fatal error: unable to create directory {sk_dir}. Error: {e}");
+        std::process::exit(1);
+    }
+
     if wait > 0 && !std::path::Path::new(sk_file).exists() {
         std::thread::sleep(std::time::Duration::from_millis(wait));
     }
@@ -189,7 +198,6 @@ pub async fn listen_signal() -> Result<()> {
     unreachable!();
 }
 
-
 pub fn check_software_update() {
     const ONE_DAY_IN_SECONDS: u64 = 60 * 60 * 24;
     std::thread::spawn(move || loop {
@@ -197,7 +205,6 @@ pub fn check_software_update() {
         std::thread::sleep(std::time::Duration::from_secs(ONE_DAY_IN_SECONDS));
     });
 }
-
 #[tokio::main(flavor = "current_thread")]
 async fn check_software_update_() -> hbb_common::ResultType<()> {
     let (request, url) = hbb_common::version_check_request(hbb_common::VER_TYPE_RUSTDESK_SERVER.to_string());
@@ -206,7 +213,6 @@ async fn check_software_update_() -> hbb_common::ResultType<()> {
         .json(&request)
         .send()
         .await?;
-
     let bytes = latest_release_response.bytes().await?;
     let resp: hbb_common::VersionCheckResponse = serde_json::from_slice(&bytes)?;
     let response_url = resp.url;

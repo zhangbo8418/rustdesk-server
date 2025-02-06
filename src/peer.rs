@@ -68,16 +68,22 @@ pub(crate) struct PeerMap {
 impl PeerMap {
     pub(crate) async fn new() -> ResultType<Self> {
         let db = std::env::var("DB_URL").unwrap_or({
-            let mut db = "db_v2.sqlite3".to_owned();
+            let mut db = "data/db_v2.sqlite3".to_owned();
             #[cfg(all(windows, not(debug_assertions)))]
             {
                 if let Some(path) = hbb_common::config::Config::icon_path().parent() {
-                    db = format!("{}\\{}", path.to_str().unwrap_or("."), db);
+                    db = format!("{}\\data\\{}", path.to_str().unwrap_or("."), db);
                 }
             }
             #[cfg(not(windows))]
             {
                 db = format!("./{db}");
+            }
+            let data_dir = Path::new("data");
+            if !data_dir.exists() {
+                fs::create_dir(data_dir).unwrap_or_else(|err| {
+                    log::error!("Failed to create data directory: {}", err);
+                });
             }
             db
         });

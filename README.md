@@ -1,82 +1,137 @@
+
+# 关于此分支
+
+
+
+[![build](https://github.com/lejianwen/rustdesk-server/actions/workflows/build.yaml/badge.svg)](https://github.com/lejianwen/rustdesk-server/actions/workflows/build.yaml)
+
+- 解决当客户端登录了`Api`账号时链接超时的问题
+- s6镜像添加了`Api`支持，`Api`开源地址 https://github.com/lejianwen/rustdesk-api
+- 是否必须登录才能链接， `MUST_LOGIN` 默认为 `N`，设置为 `Y` 则必须登录才能链接
+- `RUSTDESK_API_JWT_KEY`，设置后会通过`JWT`校验token的合法性
+
+## docker镜像地址
+
+- s6 镜像 [lejianwen/rustdesk-server-s6](https://hub.docker.com/r/lejianwen/rustdesk-server-s6)
+
+```yaml
+ networks:
+   rustdesk-net:
+     external: false
+ services:
+   rustdesk:
+     ports:
+       - 21114:21114
+       - 21115:21115
+       - 21116:21116
+       - 21116:21116/udp
+       - 21117:21117
+       - 21118:21118
+       - 21119:21119
+     image: lejianwen/rustdesk-server-s6:latest
+     environment:
+       - RELAY=<relay_server[:port]>
+       - ENCRYPTED_ONLY=1
+       - MUST_LOGIN=N
+       - TZ=Asia/Shanghai
+       - RUSTDESK_API_RUSTDESK_ID_SERVER=<id_server[:21116]>
+       - RUSTDESK_API_RUSTDESK_RELAY_SERVER=<relay_server[:21117]>
+       - RUSTDESK_API_RUSTDESK_API_SERVER=http://<api_server[:21114]>
+       - RUSTDESK_API_KEY_FILE=/data/id_ed25519.pub
+       - RUSTDESK_API_JWT_KEY=xxxxxx # jwt key
+     volumes:
+       - /data/rustdesk/server:/data
+       - /data/rustdesk/api:/app/data #将数据库挂载
+     networks:
+       - rustdesk-net
+     restart: unless-stopped
+       
+```
+
+- 普通镜像 [lejianwen/rustdesk-server](https://hub.docker.com/r/lejianwen/rustdesk-server)
+
+
+# API功能截图
+
+![Api.png](./readme/api.png)
+
+![commnd.png](./readme/command_simple.png)
+
+更多查看 [RustDesk Api](https://github.com/lejianwen/rustdesk-api)
+
+
+--- 
+
 <p align="center">
-  <a href="#how-to-build-manually">Manually</a> •
-  <a href="#docker-images">Docker</a> •
-  <a href="#s6-overlay-based-images">S6-overlay</a> •
-  <a href="#how-to-create-a-keypair">Keypair</a> •
-  <a href="#deb-packages">Debian</a> •
-  <a href="#env-variables">Variables</a><br>
-  [<a href="README-DE.md">Deutsch</a>] | [<a href="README-NL.md">Nederlands</a>] | [<a href="README-TW.md">繁體中文</a>] | [<a href="README-ZH.md">简体中文</a>]<br>
+  <a href="#如何自行构建">自行构建</a> •
+  <a href="#Docker-镜像">Docker</a> •
+  <a href="#基于-S6-overlay-的镜像">S6-overlay</a> •
+  <a href="#如何创建密钥">密钥</a> •
+  <a href="#deb-套件">Debian</a> •
+  <a href="#ENV-环境参数">环境参数</a><br>
+  [<a href="README-EN.md">English</a>] | [<a href="README-DE.md">Deutsch</a>] | [<a href="README-NL.md">Nederlands</a>] | [<a href="README-TW.md">繁体中文</a>]<br>
 </p>
 
 # RustDesk Server Program
 
-[![build](https://github.com/rustdesk/rustdesk-server/actions/workflows/build.yaml/badge.svg)](https://github.com/rustdesk/rustdesk-server/actions/workflows/build.yaml)
 
-[**Download**](https://github.com/rustdesk/rustdesk-server/releases)
 
-[**Manual**](https://rustdesk.com/docs/en/self-host/)
+[**下载**](https://github.com/lejianwen/rustdesk-server/releases)
 
-[**FAQ**](https://github.com/rustdesk/rustdesk/wiki/FAQ)
+[**说明文件**](https://rustdesk.com/docs/zh-cn/self-host/)
 
-Self-host your own RustDesk server, it is free and open source.
+自行搭建属于你的RustDesk服务器,所有的一切都是免费且开源的
 
-## How to build manually
+## 如何自行构建
 
 ```bash
 cargo build --release
 ```
 
-Three executables will be generated in target/release.
+执行后会在target/release目录下生成三个对应平台的可执行程序
 
-- hbbs - RustDesk ID/Rendezvous server
-- hbbr - RustDesk relay server
-- rustdesk-utils - RustDesk CLI utilities
+- hbbs - RustDesk ID/会和服务器
+- hbbr - RustDesk 中继服务器
+- rustdesk-utils - RustDesk 命令行工具
 
-You can find updated binaries on the [Releases](https://github.com/rustdesk/rustdesk-server/releases) page.
+您可以在 [releases](https://github.com/lejianwen/rustdesk-server/releases) 页面中找到最新的服务端软件。
 
-If you want extra features, [RustDesk Server Pro](https://rustdesk.com/pricing.html) might suit you better.
+如果您需要额外的功能支持，[RustDesk 专业版服务器](https://rustdesk.com/pricing.html) 获取更适合您。
 
-If you want to develop your own server, [rustdesk-server-demo](https://github.com/rustdesk/rustdesk-server-demo) might be a better and simpler start for you than this repo.
+如果您想开发自己的服务器，[rustdesk-server-demo](https://github.com/rustdesk/rustdesk-server-demo) 应该会比直接使用这个仓库更简单快捷。
 
-## Docker images
+## Docker 镜像
 
-Docker images are automatically generated and published to [Docker Hub](https://hub.docker.com/r/rustdesk) and [GitHub Container Registry](https://github.com/rustdesk?tab=packages&repo_name=rustdesk-server) on every GitHub release. We have 2 kind of images.
+Docker镜像会在每次 GitHub 发布新的release版本时自动构建。我们提供两种类型的镜像。
 
-### Classic image
+### Classic 传统镜像
 
-These images are built from scratch with two main binaries (`hbbs` and `hbbr`). They're available on [Docker Hub](https://hub.docker.com/r/rustdesk/rustdesk-server/) and [GitHub Container Registry](https://github.com/rustdesk/rustdesk-server/pkgs/container/rustdesk-server) with these architectures:
+这个类型的镜像是基于 `ubuntu-20.04` 进行构建，镜像仅包含两个主要的可执行程序（`hbbr` 和 `hbbs`）。它们可以通过以下tag在 [Docker Hub](https://hub.docker.com/r/lejianwen/rustdesk-server/) 上获得：
 
-* amd64
-* arm64v8
-* armv7
+| 架构      | image:tag                                 |
+|---------| ----------------------------------------- |
+| amd64   | `lejianwen/rustdesk-server:latest`         |
+| arm64v8 | `lejianwen/rustdesk-server:latest-arm64v8` |
 
-You could use `latest` tag or major version tag `1` with supported architectures:
-
-| Version       | image:tag                         |
-| ------------- | --------------------------------- |
-| latest        | `rustdesk/rustdesk-server:latest` |
-| Major version | `rustdesk/rustdesk-server:1`      |
-
-
-You can start these images directly with `docker run` with these commands:
+您可以使用以下命令，直接通过 ``docker run`` 來启动这些镜像：
 
 ```bash
-docker run --name hbbs --net=host -v "$PWD/data:/root" -d rustdesk/rustdesk-server:latest hbbs -r <relay-server-ip[:port]> 
-docker run --name hbbr --net=host -v "$PWD/data:/root" -d rustdesk/rustdesk-server:latest hbbr 
+docker run --name hbbs --net=host -v "$PWD/data:/root" -d lejianwen/rustdesk-server:latest hbbs -r <relay-server-ip[:port]> 
+docker run --name hbbr --net=host -v "$PWD/data:/root" -d lejianwen/rustdesk-server:latest hbbr 
 ```
 
-or without `--net=host`, but P2P direct connection can not work.
+或不使用 `--net=host` 参数启动， 但这样 P2P 直连功能将无法工作。
 
-For systems using SELinux, replacing `/root` by `/root:z` is required for the containers to run correctly. Alternatively, SELinux container separation can be disabled completely adding the option `--security-opt label=disable`.
+对于使用了 SELinux 的系统，您需要将 ``/root`` 替换为 ``/root:z``，以保证容器的正常运行。或者，也可以通过添加参数 ``--security-opt label=disable`` 来完全禁用 SELinux 容器隔离。
 
 ```bash
-docker run --name hbbs -p 21115:21115 -p 21116:21116 -p 21116:21116/udp -p 21118:21118 -v "$PWD/data:/root" -d rustdesk/rustdesk-server:latest hbbs -r <relay-server-ip[:port]> 
-docker run --name hbbr -p 21117:21117 -p 21119:21119 -v "$PWD/data:/root" -d rustdesk/rustdesk-server:latest hbbr 
+docker run --name hbbs -p 21115:21115 -p 21116:21116 -p 21116:21116/udp -p 21118:21118 -v "$PWD/data:/root" -d lejianwen/rustdesk-server:latest hbbs -r <relay-server-ip[:port]> 
+docker run --name hbbr -p 21117:21117 -p 21119:21119 -v "$PWD/data:/root" -d lejianwen/rustdesk-server:latest hbbr 
 ```
 
-The `relay-server-ip` parameter is the IP address (or dns name) of the server running these containers. The **optional** `port` parameter has to be used if you use a port different than **21117** for `hbbr`.
+`relay-server-ip` 参数是运行这些容器的服务器的 IP 地址（或 DNS 名称）。如果你不想使用 **21117** 作为 `hbbr` 的服务端口,可使用可选参数 `port` 进行指定。
 
-You can also use docker-compose, using this configuration as a template:
+您也可以使用 docker-compose 进行构建,以下为配置示例：
 
 ```yaml
 version: '3'
@@ -93,7 +148,7 @@ services:
       - 21116:21116
       - 21116:21116/udp
       - 21118:21118
-    image: rustdesk/rustdesk-server:latest
+    image: lejianwen/rustdesk-server:latest
     command: hbbs -r rustdesk.example.com:21117
     volumes:
       - ./data:/root
@@ -108,7 +163,7 @@ services:
     ports:
       - 21117:21117
       - 21119:21119
-    image: rustdesk/rustdesk-server:latest
+    image: lejianwen/rustdesk-server:latest
     command: hbbr
     volumes:
       - ./data:/root
@@ -117,45 +172,48 @@ services:
     restart: unless-stopped
 ```
 
-Edit line 16 to point to your relay server (the one listening on port 21117). You can also edit the volume lines (line 18 and line 33) if you need.
+编辑第16行来指定你的中继服务器 （默认端口监听在 21117 的那一个）。 如果需要的话，您也可以编辑 volume 信息  (第 18 和 33 行)。
 
-(docker-compose credit goes to @lukebarone and @QuiGonLeong)
+（感谢 @lukebarone 和 @QuiGonLeong 协助提供的 docker-compose 配置示例）
 
-> [!NOTE]  
-> The rustdesk/rustdesk-server:latest in China may be replaced with the latest version number on Docker Hub, such as `rustdesk-server:1.1.10-3`. Otherwise, the old version may be pulled due to image acceleration.
+## 基于 S6-overlay 的镜像
 
-> [!NOTE]  
-> If you are experiencing issues pulling from Docker Hub, try pulling from the [GitHub Container Registry](https://github.com/rustdesk/rustdesk-server/pkgs/container/rustdesk-server) instead.
+> 这些镜像是针对 `busybox:stable` 构建的，并添加了可执行程序（hbbr 和 hbbs）以及 [S6-overlay](https://github.com/just-containers/s6-overlay)。 它们可以使用以下tag在 [Docker hub](https://hub.docker.com/r/lejianwen/rustdesk-server-s6/) 上获取：
 
-## S6-overlay based images
 
-These images are build against `busybox:stable` with the addition of the binaries (both `hbbs` and `hbbr`) and [S6-overlay](https://github.com/just-containers/s6-overlay). They're available on [Docker hub](https://hub.docker.com/r/rustdesk/rustdesk-server-s6/) and [GitHub Container Registry](https://github.com/rustdesk/rustdesk-server/pkgs/container/rustdesk-server) with these architectures:
+| 架構      | version | image:tag                                    |
+| --------- | ------- | -------------------------------------------- |
+| multiarch | latest  | `lejianwen/rustdesk-server-s6:latest`         |
+| amd64     | latest  | `lejianwen/rustdesk-server-s6:latest-amd64`   |
+| i386      | latest  | `lejianwen/rustdesk-server-s6:latest-i386`    |
+| arm64v8   | latest  | `lejianwen/rustdesk-server-s6:latest-arm64v8` |
+| armv7     | latest  | `lejianwen/rustdesk-server-s6:latest-armv7`   |
+| multiarch | 2       | `lejianwen/rustdesk-server-s6:2`              |
+| amd64     | 2       | `lejianwen/rustdesk-server-s6:2-amd64`        |
+| i386      | 2       | `lejianwen/rustdesk-server-s6:2-i386`         |
+| arm64v8   | 2       | `lejianwen/rustdesk-server-s6:2-arm64v8`      |
+| armv7     | 2       | `lejianwen/rustdesk-server-s6:2-armv7`        |
+| multiarch | 2.0.0   | `lejianwen/rustdesk-server-s6:2.0.0`          |
+| amd64     | 2.0.0   | `lejianwen/rustdesk-server-s6:2.0.0-amd64`    |
+| i386      | 2.0.0   | `lejianwen/rustdesk-server-s6:2.0.0-i386`     |
+| arm64v8   | 2.0.0   | `lejianwen/rustdesk-server-s6:2.0.0-arm64v8`  |
+| armv7     | 2.0.0   | `lejianwen/rustdesk-server-s6:2.0.0-armv7`    |
 
-* amd64
-* i386
-* arm64v8
-* armv7
+强烈建议您使用`major version` 或 `latest` tag 的 `multiarch` 架构的镜像。
 
-You could use `latest` tag or major version tag `1` with supported architectures:
+S6-overlay 在此处作为监控程序，用以保证两个进程的运行，因此使用此镜像，您无需运行两个容器。
 
-| Version       | image:tag                            |
-| ------------- | ------------------------------------ |
-| latest        | `rustdesk/rustdesk-server-s6:latest` |
-| Major version | `rustdesk/rustdesk-server-s6:1`      |
-
-The S6-overlay acts as a supervisor and keeps both process running, so with this image, there's no need to have two separate running containers.
-
-You can start these images directly with `docker run` with this command:
+您可以使用 `docker run` 命令直接启动镜像，如下：
 
 ```bash
 docker run --name rustdesk-server \ 
   --net=host \
   -e "RELAY=rustdeskrelay.example.com" \
   -e "ENCRYPTED_ONLY=1" \
-  -v "$PWD/data:/data" -d rustdesk/rustdesk-server-s6:latest
+  -v "$PWD/data:/data" -d lejianwen/rustdesk-server-s6:latest
 ```
 
-or without `--net=host`, but P2P direct connection cannot work.
+或刪去 `--net=host` 参数， 但 P2P 直连功能将无法工作。
 
 ```bash
 docker run --name rustdesk-server \
@@ -163,10 +221,10 @@ docker run --name rustdesk-server \
   -p 21117:21117 -p 21118:21118 -p 21119:21119 \
   -e "RELAY=rustdeskrelay.example.com" \
   -e "ENCRYPTED_ONLY=1" \
-  -v "$PWD/data:/data" -d rustdesk/rustdesk-server-s6:latest
+  -v "$PWD/data:/data" -d lejianwen/rustdesk-server-s6:latest
 ```
 
-Or you can use a docker-compose file:
+或着您也可以使用 docker-compose 文件:
 
 ```yaml
 version: '3'
@@ -175,13 +233,14 @@ services:
   rustdesk-server:
     container_name: rustdesk-server
     ports:
+      - 21114:21114
       - 21115:21115
       - 21116:21116
       - 21116:21116/udp
       - 21117:21117
       - 21118:21118
       - 21119:21119
-    image: rustdesk/rustdesk-server-s6:latest
+    image: lejianwen/rustdesk-server-s6:latest
     environment:
       - "RELAY=rustdesk.example.com:21117"
       - "ENCRYPTED_ONLY=1"
@@ -190,26 +249,26 @@ services:
     restart: unless-stopped
 ```
 
-For this container image, you can use these environment variables, **in addition** to the ones specified in the following **ENV variables** section:
+对于此容器镜像，除了在下面的环境变量部分指定的变量之外，您还可以使用以下`环境变量`
 
-| variable | optional | description |
-| --- | --- | --- |
-| RELAY | no | the IP address/DNS name of the machine running this container |
-| ENCRYPTED_ONLY | yes | if set to **"1"** unencrypted connection will not be accepted |
-| KEY_PUB | yes | public part of the key pair |
-| KEY_PRIV | yes | private part of the key pair |
+| 环境变量           | 是否可选 | 描述                       |
+|----------------|------|--------------------------|
+| RELAY          | 否    | 运行此容器的宿主机的 IP 地址/ DNS 名称 |
+| ENCRYPTED_ONLY | 是    | 如果设置为 **"1"**，将不接受未加密的连接。 |
+| KEY_PUB        | 是    | 密钥对中的公钥（Public Key）      |
+| KEY_PRIV       | 是    | 密钥对中的私钥（Private Key）     |
 
-### Secret management in S6-overlay based images
+###  基于 S6-overlay 镜像的密钥管理
 
-You can obviously keep the key pair in a docker volume, but the best practices tells you to not write the keys on the filesystem; so we provide a couple of options.
+您可以将密钥对保存在 Docker volume 中，但我们建议不要将密钥写入文件系統中；因此，我们提供了一些方案。
 
-On container startup, the presence of the keypair is checked (`/data/id_ed25519.pub` and `/data/id_ed25519`) and if one of these keys doesn't exist, it's recreated from ENV variables or docker secrets.
-Then the validity of the keypair is checked: if public and private keys doesn't match, the container will stop.
-If you provide no keys, `hbbs` will generate one for you, and it'll place it in the default location.
+在容器启动时，会检查密钥对是否存在（`/data/id_ed25519.pub` 和 `/data/id_ed25519`），如果其中一個密钥不存在，则会从环境变量或 Docker Secret 中重新生成它。
+然后检查密钥对的可用性：如果公钥和私钥不匹配，容器将停止运行。
+如果您未提供密钥，`hbbs` 将会在默认位置生成一个。
 
-#### Use ENV to store the key pair
+#### 使用 ENV 存储密钥对
 
-You can use docker environment variables to store the keys. Just follow this examples:
+您可以使用 Docker 环境变量來存储密钥。如下：
 
 ```bash
 docker run --name rustdesk-server \ 
@@ -219,7 +278,7 @@ docker run --name rustdesk-server \
   -e "DB_URL=/db/db_v2.sqlite3" \
   -e "KEY_PRIV=FR2j78IxfwJNR+HjLluQ2Nh7eEryEeIZCwiQDPVe+PaITKyShphHAsPLn7So0OqRs92nGvSRdFJnE2MSyrKTIQ==" \
   -e "KEY_PUB=iEyskoaYRwLDy5+0qNDqkbPdpxr0kXRSZxNjEsqykyE=" \
-  -v "$PWD/db:/db" -d rustdesk/rustdesk-server-s6:latest
+  -v "$PWD/db:/db" -d lejianwen/rustdesk-server-s6:latest
 ```
 
 ```yaml
@@ -229,13 +288,14 @@ services:
   rustdesk-server:
     container_name: rustdesk-server
     ports:
+      - 21114:21114
       - 21115:21115
       - 21116:21116
       - 21116:21116/udp
       - 21117:21117
       - 21118:21118
       - 21119:21119
-    image: rustdesk/rustdesk-server-s6:latest
+    image: lejianwen/rustdesk-server-s6:latest
     environment:
       - "RELAY=rustdesk.example.com:21117"
       - "ENCRYPTED_ONLY=1"
@@ -247,11 +307,11 @@ services:
     restart: unless-stopped
 ```
 
-#### Use Docker secrets to store the key pair
+#### 使用 Docker Secret 來保存密钥对
 
-You can alternatively use docker secrets to store the keys.
-This is useful if you're using **docker-compose** or **Docker Swarm**.
-Just follow this examples:
+您还可以使用 Docker Secret 來保存密钥。
+如果您使用 **docker-compose** 或 **docker swarm**，推荐您使用。
+只需按照以下示例操作：
 
 ```bash
 cat secrets/id_ed25519.pub | docker secret create key_pub -
@@ -263,7 +323,7 @@ docker service create --name rustdesk-server \
   -e "ENCRYPTED_ONLY=1" \
   -e "DB_URL=/db/db_v2.sqlite3" \
   --mount "type=bind,source=$PWD/db,destination=/db" \
-  rustdesk/rustdesk-server-s6:latest
+  lejianwen/rustdesk-server-s6:latest
 ```
 
 ```yaml
@@ -273,13 +333,14 @@ services:
   rustdesk-server:
     container_name: rustdesk-server
     ports:
+      - 21114:21114
       - 21115:21115
       - 21116:21116
       - 21116:21116/udp
       - 21117:21117
       - 21118:21118
       - 21119:21119
-    image: rustdesk/rustdesk-server-s6:latest
+    image: lejianwen/rustdesk-server-s6:latest
     environment:
       - "RELAY=rustdesk.example.com:21117"
       - "ENCRYPTED_ONLY=1"
@@ -298,57 +359,55 @@ secrets:
     file: secrets/id_ed25519      
 ```
 
-## How to create a keypair
+## 如何生成密钥对
 
-A keypair is needed for encryption; you can provide it, as explained before, but you need a way to create one.
+加密需要一对密钥；您可以按照前面所述提供它，但需要一个工具去生成密钥对。
 
-You can use this command to generate a keypair:
+您可以使用以下命令生成一对密钥：
 
 ```bash
 /usr/bin/rustdesk-utils genkeypair
 ```
 
-If you don't have (or don't want) the `rustdesk-utils` package installed on your system, you can invoke the same command with docker:
+如果您沒有（或不想）在系统上安装 `rustdesk-utils` 套件，您可以使用 Docker 执行相同的命令：
 
 ```bash
-docker run --rm --entrypoint /usr/bin/rustdesk-utils  rustdesk/rustdesk-server-s6:latest genkeypair
+docker run --rm --entrypoint /usr/bin/rustdesk-utils  lejianwen/rustdesk-server-s6:latest genkeypair
 ```
 
-The output will be something like this:
+运行后的输出内容如下：
 
 ```text
 Public Key:  8BLLhtzUBU/XKAH4mep3p+IX4DSApe7qbAwNH9nv4yA=
 Secret Key:  egAVd44u33ZEUIDTtksGcHeVeAwywarEdHmf99KM5ajwEsuG3NQFT9coAfiZ6nen4hfgNICl7upsDA0f2e/jIA==
 ```
 
-## .deb packages
+## .deb 套件
 
-Separate .deb packages are available for each binary, you can find them in the [Releases](https://github.com/rustdesk/rustdesk-server/releases).
-These packages are meant for the following distributions:
+每个可执行文件都有单独的 .deb 套件可供使用，您可以在 [releases](https://github.com/lejianwen/rustdesk-server/releases) 页面中找到它們。
+這些套件适用于以下发行版：
 
-- Ubuntu 24.04 LTS
 - Ubuntu 22.04 LTS
 - Ubuntu 20.04 LTS
 - Ubuntu 18.04 LTS
-- Debian 12 bookworm
 - Debian 11 bullseye
 - Debian 10 buster
 
-## ENV variables
+## ENV 环境变量
 
-`hbbs` and `hbbr` can be configured using these ENV variables.
-You can specify the variables as usual or use an `.env` file.
+可以使用这些`环境变量`参数來配置 hbbs 和 hbbr。
+您可以像往常一样指定参数，或者使用 .env 文件。
 
-| variable | binary | description |
-| --- | --- | --- |
-| ALWAYS_USE_RELAY | hbbs | if set to **"Y"** disallows direct peer connection |
-| DB_URL | hbbs | path for database file |
-| DOWNGRADE_START_CHECK | hbbr | delay (in seconds) before downgrade check |
-| DOWNGRADE_THRESHOLD | hbbr | threshold of downgrade check (bit/ms) |
-| KEY | hbbs/hbbr | if set force the use of a specific key, if set to **"_"** force the use of any key |
-| LIMIT_SPEED | hbbr | speed limit (in Mb/s) |
-| PORT | hbbs/hbbr | listening port (21116 for hbbs - 21117 for hbbr) |
-| RELAY | hbbs | IP address/DNS name of the machines running hbbr (separated by comma) |
-| RUST_LOG | all | set debug level (error\|warn\|info\|debug\|trace) |
-| SINGLE_BANDWIDTH | hbbr | max bandwidth for a single connection (in Mb/s) |
-| TOTAL_BANDWIDTH | hbbr | max total bandwidth (in Mb/s) |
+| 参数                    | 可执行文件         | 描述                                               |
+|-----------------------|---------------|--------------------------------------------------|
+| ALWAYS_USE_RELAY      | hbbs          | 如果设定为 **"Y"**，将关闭直接点对点连接功能                       |
+| DB_URL                | hbbs          | 数据库配置                                            |
+| DOWNGRADE_START_CHECK | hbbr          | 降级检查之前的延迟是啊尽（以秒为单位）                              |
+| DOWNGRADE_THRESHOLD   | hbbr          | 降级检查的阈值（bit/ms）                                  |
+| KEY                   | hbbs/hbbr     | 如果设置了此参数，将强制使用指定密钥对，如果设为 **"_"**，则强制使用任意密钥       |
+| LIMIT_SPEED           | hbbr          | 速度限制（以Mb/s为单位）                                   |
+| PORT                  | hbbs/hbbr     | 监听端口（hbbs为21116，hbbr为21117）                      |
+| RELAY_SERVERS         | hbbs          | 运行hbbr的机器的IP地址/DNS名称（用逗号分隔）                      |
+| RUST_LOG              | all           | 设置 debug level (error\|warn\|info\|debug\|trace) |
+| SINGLE_BANDWIDTH      | hbbr          | 单个连接的最大带宽（以Mb/s为单位）                              |
+| TOTAL_BANDWIDTH       | hbbr          | 最大总带宽（以Mb/s为单位）                                  |

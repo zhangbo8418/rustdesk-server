@@ -1,5 +1,6 @@
 use crate::common::*;
 use crate::peer::*;
+use hbb_common::bytes::BufMut;
 use hbb_common::{
     allow_err, bail,
     bytes::{Bytes, BytesMut},
@@ -13,9 +14,15 @@ use hbb_common::{
     log,
     protobuf::{Message as _, MessageField},
     rendezvous_proto::{
-        register_pk_response::Result::{TOO_FREQUENT, UUID_MISMATCH},
+        register_pk_response::Result::{INVALID_ID_FORMAT, TOO_FREQUENT, UUID_MISMATCH},
         *,
     },
+    sodiumoxide::crypto::{
+        box_, box_::PublicKey, box_::SecretKey, secretbox, secretbox::Key, secretbox::Nonce, sign,
+    },
+    sodiumoxide::hex,
+    tcp,
+    tcp::Encrypt,
     tcp::{listen_any, FramedStream},
     timeout,
     tokio::{
@@ -31,7 +38,7 @@ use hbb_common::{
     AddrMangle, ResultType,
 };
 use ipnetwork::Ipv4Network;
-use sodiumoxide::crypto::sign;
+
 use std::{
     collections::HashMap,
     net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr},
@@ -39,6 +46,7 @@ use std::{
     sync::Arc,
     time::Instant,
 };
+use crate::jwt;
 
 #[derive(Clone, Debug)]
 enum Data {
@@ -50,9 +58,13 @@ enum Data {
 const REG_TIMEOUT: i32 = 30_000;
 type TcpStreamSink = SplitSink<Framed<TcpStream, BytesCodec>, Bytes>;
 type WsSink = SplitSink<tokio_tungstenite::WebSocketStream<TcpStream>, tungstenite::Message>;
-enum Sink {
+enum SinkType {
     TcpStream(TcpStreamSink),
     Ws(WsSink),
+}
+struct Sink {
+    tx: SinkType,
+    key: Arc<Mutex<Option<Encrypt>>>,
 }
 type Sender = mpsc::UnboundedSender<Data>;
 type Receiver = mpsc::UnboundedReceiver<Data>;
@@ -60,6 +72,7 @@ static ROTATION_RELAY_SERVER: AtomicUsize = AtomicUsize::new(0);
 type RelayServers = Vec<String>;
 const CHECK_RELAY_TIMEOUT: u64 = 3_000;
 static ALWAYS_USE_RELAY: AtomicBool = AtomicBool::new(false);
+static MUST_LOGIN: AtomicBool = AtomicBool::new(false);
 
 #[derive(Clone)]
 struct Inner {
@@ -69,6 +82,8 @@ struct Inner {
     mask: Option<Ipv4Network>,
     local_ip: String,
     sk: Option<sign::SecretKey>,
+    secure_tcp_pk_b: PublicKey,
+    secure_tcp_sk_b: SecretKey,
 }
 
 #[derive(Clone)]
@@ -119,6 +134,8 @@ impl RendezvousServer {
                     .unwrap_or_default(),
             )
         };
+        // For privacy use per connection key pair
+        let (secure_tcp_pk_b, secure_tcp_sk_b) = box_::gen_keypair();
         let mut rs = Self {
             tcp_punch: Arc::new(Mutex::new(HashMap::new())),
             pm,
@@ -133,6 +150,8 @@ impl RendezvousServer {
                 sk,
                 mask,
                 local_ip,
+                secure_tcp_pk_b,
+                secure_tcp_sk_b,
             }),
         };
         log::info!("mask: {:?}", rs.inner.mask);
@@ -153,6 +172,25 @@ impl RendezvousServer {
         log::info!(
             "ALWAYS_USE_RELAY={}",
             if ALWAYS_USE_RELAY.load(Ordering::SeqCst) {
+                "Y"
+            } else {
+                "N"
+            }
+        );
+
+        let must_login = get_arg("must-login");
+        log::debug!("must_login={}", must_login);
+        if must_login.to_uppercase() == "Y" ||
+            (must_login == "" && std::env::var("MUST_LOGIN")
+            .unwrap_or_default()
+            .to_uppercase()
+            == "Y") {
+            MUST_LOGIN.store(true, Ordering::SeqCst);
+        }
+
+        log::info!(
+            "MUST_LOGIN={}",
+            if MUST_LOGIN.load(Ordering::SeqCst) {
                 "Y"
             } else {
                 "N"
@@ -554,10 +592,66 @@ impl RendezvousServer {
                     });
                     Self::send_to_sink(sink, msg_out).await;
                 }
+                Some(rendezvous_message::Union::KeyExchange(ex)) => {
+                    log::trace!("KeyExchange {:?} <- bytes: {:?}", addr, hex::encode(&bytes));
+                    if ex.keys.len() != 2 {
+                        log::error!("Handshake failed: invalid phase 2 key exchange message");
+                        return false;
+                    }
+                    log::trace!("KeyExchange their_pk: {:?}", hex::encode(&ex.keys[0]));
+                    log::trace!("KeyExchange box: {:?}", hex::encode(&ex.keys[1]));
+                    let their_pk: [u8; 32] = ex.keys[0].to_vec().try_into().unwrap();
+                    let cryptobox: [u8; 48] = ex.keys[1].to_vec().try_into().unwrap();
+                    let symetric_key = get_symetric_key_from_msg(
+                        self.inner.secure_tcp_sk_b.0,
+                        their_pk,
+                        &cryptobox,
+                    );
+                    log::debug!("KeyExchange symetric key: {:?}", hex::encode(&symetric_key));
+                    let key = secretbox::Key::from_slice(&symetric_key);
+                    match key {
+                        Some(key) => {
+                            if let Some(sink) = sink.as_mut() {
+                                sink.key.lock().await.replace(Encrypt::new(key));
+                            }
+                            log::debug!("KeyExchange symetric key set");
+                            return true;
+                        }
+                        None => {
+                            log::error!("KeyExchange symetric key NOT set");
+                            return false;
+                        }
+                    }
+                }
+                Some(rendezvous_message::Union::OnlineRequest(or)) => {
+                    let mut states = self.peers_online_state(or.peers).await;
+                    let mut msg_out = RendezvousMessage::new();
+                    msg_out.set_online_response(OnlineResponse {
+                        states: states.into(),
+                        ..Default::default()
+                    });
+                    Self::send_to_sink(sink, msg_out).await;
+                }
                 _ => {}
             }
         }
         false
+    }
+
+    async fn peers_online_state(&mut self, peers: Vec<String>) -> BytesMut {
+        let mut states = BytesMut::zeroed((peers.len() + 7) / 8);
+        for (i, peer_id) in peers.iter().enumerate() {
+            if let Some(peer) = self.pm.get_in_memory(peer_id).await {
+                let elapsed = peer.read().await.last_reg_time.elapsed().as_millis() as i32;
+                // bytes index from left to right
+                let states_idx = i / 8;
+                let bit_idx = 7 - i % 8;
+                if elapsed < REG_TIMEOUT {
+                    states[states_idx] |= 0x01 << bit_idx;
+                }
+            }
+        }
+        states
     }
 
     #[inline]
@@ -687,6 +781,29 @@ impl RendezvousServer {
             });
             return Ok((msg_out, None));
         }
+        // if secret is not empty check token by jwt
+        if MUST_LOGIN.load(Ordering::SeqCst) {
+            if ph.token.is_empty() {
+                let mut msg_out = RendezvousMessage::new();
+                msg_out.set_punch_hole_response(PunchHoleResponse {
+                    other_failure: String::from("Connection failed, please login!"),
+                    ..Default::default()
+                });
+                return Ok((msg_out, None));
+            } else if !jwt::SECRET.is_empty() {
+                let token = ph.token;
+                let token = jwt::verify_token(token.as_str());
+                if token.is_err() {
+                    let mut msg_out = RendezvousMessage::new();
+                    msg_out.set_punch_hole_response(PunchHoleResponse {
+                        //提示重新登录
+                        other_failure: String::from("Token error, please log out and log back in!"),
+                        ..Default::default()
+                    });
+                    return Ok((msg_out, None));
+                }
+            }
+        }
         let id = ph.id;
         // punch hole request from A, relay to B,
         // check if in same intranet first,
@@ -769,18 +886,7 @@ impl RendezvousServer {
         stream: &mut FramedStream,
         peers: Vec<String>,
     ) -> ResultType<()> {
-        let mut states = BytesMut::zeroed((peers.len() + 7) / 8);
-        for (i, peer_id) in peers.iter().enumerate() {
-            if let Some(peer) = self.pm.get_in_memory(peer_id).await {
-                let elapsed = peer.read().await.last_reg_time.elapsed().as_millis() as i32;
-                // bytes index from left to right
-                let states_idx = i / 8;
-                let bit_idx = 7 - i % 8;
-                if elapsed < REG_TIMEOUT {
-                    states[states_idx] |= 0x01 << bit_idx;
-                }
-            }
-        }
+        let mut states = self.peers_online_state(peers).await;
 
         let mut msg_out = RendezvousMessage::new();
         msg_out.set_online_response(OnlineResponse {
@@ -803,12 +909,15 @@ impl RendezvousServer {
     #[inline]
     async fn send_to_sink(sink: &mut Option<Sink>, msg: RendezvousMessage) {
         if let Some(sink) = sink.as_mut() {
-            if let Ok(bytes) = msg.write_to_bytes() {
-                match sink {
-                    Sink::TcpStream(s) => {
+            if let Ok(mut bytes) = msg.write_to_bytes() {
+                if let Some(enc) = &mut sink.key.lock().await.as_mut() {
+                    bytes = enc.enc(&bytes);
+                }
+                match &mut sink.tx {
+                    SinkType::TcpStream(s) => {
                         allow_err!(s.send(Bytes::from(bytes)).await);
                     }
-                    Sink::Ws(ws) => {
+                    SinkType::Ws(ws) => {
                         allow_err!(ws.send(tungstenite::Message::Binary(bytes)).await);
                     }
                 }
@@ -916,13 +1025,14 @@ impl RendezvousServer {
         match fds.next() {
             Some("h") => {
                 res = format!(
-                    "{}\n{}\n{}\n{}\n{}\n{}\n",
+                    "{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
                     "relay-servers(rs) <separated by ,>",
                     "reload-geo(rg)",
                     "ip-blocker(ib) [<ip>|<number>] [-]",
                     "ip-changes(ic) [<id>|<number>] [-]",
-                    "always-use-relay(aur)",
-                    "test-geo(tg) <ip1> <ip2>"
+                    "always-use-relay(aur) [Y|N]",
+                    "test-geo(tg) <ip1> <ip2>",
+                    "must-login(ml) [Y|N]",
                 )
             }
             Some("relay-servers" | "rs") => {
@@ -1049,6 +1159,21 @@ impl RendezvousServer {
                     }
                 }
             }
+            Some("must-login" | "ml") => {
+                if let Some(rs) = fds.next() {
+                    if rs.to_uppercase() == "Y" {
+                        MUST_LOGIN.store(true, Ordering::SeqCst);
+                    } else {
+                        MUST_LOGIN.store(false, Ordering::SeqCst);
+                    }
+                } else {
+                    let _ = writeln!(
+                        res,
+                        "MUST_LOGIN: {:?}",
+                        MUST_LOGIN.load(Ordering::SeqCst)
+                    );
+                }
+            }
             _ => {}
         }
         res
@@ -1130,7 +1255,10 @@ impl RendezvousServer {
             };
             let ws_stream = tokio_tungstenite::accept_hdr_async(stream, callback).await?;
             let (a, mut b) = ws_stream.split();
-            sink = Some(Sink::Ws(a));
+            sink = Some(Sink {
+                tx: SinkType::Ws(a),
+                key: Arc::new(Mutex::new(None)),
+            });
             while let Ok(Some(Ok(msg))) = timeout(30_000, b.next()).await {
                 if let tungstenite::Message::Binary(bytes) = msg {
                     if !self.handle_tcp(&bytes, &mut sink, addr, key, ws).await {
@@ -1140,8 +1268,23 @@ impl RendezvousServer {
             }
         } else {
             let (a, mut b) = Framed::new(stream, BytesCodec::new()).split();
-            sink = Some(Sink::TcpStream(a));
-            while let Ok(Some(Ok(bytes))) = timeout(30_000, b.next()).await {
+            let enc = Arc::new(Mutex::new(None));
+            sink = Some(Sink {
+                tx: SinkType::TcpStream(a),
+                key: enc.clone(),
+            });
+            // Avoid key exchange if answering on nat helper port
+            if !key.is_empty() {
+                self.key_exchange_phase1(addr, &mut sink).await;
+            }
+            while let Ok(Some(Ok(mut bytes))) = timeout(30_000, b.next()).await {
+                let mut enc_lock = enc.lock().await;
+                if enc_lock.is_some() {
+                    if let Err(err) = enc_lock.as_mut().unwrap().dec(&mut bytes) {
+                        return Err(err.into());
+                    }
+                }
+                drop(enc_lock);
                 if !self.handle_tcp(&bytes, &mut sink, addr, key, ws).await {
                     break;
                 }
@@ -1223,6 +1366,31 @@ impl RendezvousServer {
             }
         }
         false
+    }
+
+    async fn key_exchange_phase1(&mut self, addr: SocketAddr, sink: &mut Option<Sink>) {
+        let mut msg_out = RendezvousMessage::new();
+        log::debug!("KeyExchange phase 1: send our pk for this tcp connection in a message signed with our server key");
+        let sk = &self.inner.sk;
+        match sk {
+            Some(sk) => {
+                let our_pk_b = self.inner.secure_tcp_pk_b.clone();
+                let sm = sign::sign(&our_pk_b.0, &sk);
+
+                let bytes_sm = Bytes::from(sm);
+                msg_out.set_key_exchange(KeyExchange {
+                    keys: vec![bytes_sm],
+                    ..Default::default()
+                });
+                log::trace!(
+                    "KeyExchange {:?} -> bytes: {:?}",
+                    addr,
+                    hex::encode(Bytes::from(msg_out.write_to_bytes().unwrap()))
+                );
+                Self::send_to_sink(sink, msg_out).await;
+            }
+            None => {}
+        }
     }
 }
 
@@ -1322,4 +1490,23 @@ async fn create_tcp_listener(port: i32) -> ResultType<TcpListener> {
     let s = listen_any(port as _).await?;
     log::debug!("listen on tcp {:?}", s.local_addr());
     Ok(s)
+}
+
+fn get_symetric_key_from_msg(
+    our_sk_b: [u8; 32],
+    their_pk_b: [u8; 32],
+    sealed_value: &[u8; 48],
+) -> [u8; 32] {
+    let their_pk_b = box_::PublicKey(their_pk_b);
+    let nonce = box_::Nonce([0u8; box_::NONCEBYTES]);
+    let sk = box_::SecretKey(our_sk_b);
+    let key = box_::open(sealed_value, &nonce, &their_pk_b, &sk);
+    match key {
+        Ok(key) => {
+            let mut key_array = [0u8; 32];
+            key_array.copy_from_slice(&key);
+            key_array
+        }
+        Err(e) => panic!("Error while opening the seal key{:?}", e),
+    }
 }

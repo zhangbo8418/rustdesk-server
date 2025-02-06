@@ -42,7 +42,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@v1
         with:
-          toolchain: "1.70.0"
+          toolchain: stable
           targets: ${{ matrix.job.target }}
           components: "rustfmt"
           
@@ -72,7 +72,7 @@ jobs:
   
   # Build and push single-arch Docker images to ghcr.io
   create-s6-overlay-images:
-    name: Docker push - ${{ matrix.job.name }}
+    name: Docker push s6-overlay - ${{ matrix.job.name }}
     needs: build
     runs-on: ubuntu-24.04
     strategy:
@@ -82,7 +82,7 @@ jobs:
           - { name: "amd64",   docker_platform: "linux/amd64",  s6_platform: "x86_64" }
           - { name: "arm64v8", docker_platform: "linux/arm64",  s6_platform: "aarch64" }
           - { name: "armv7",   docker_platform: "linux/arm/v7", s6_platform: "armhf" }
-          - { name: "i386",    docker_platform: "linux/386",    s6_platform: "i686" }
+#          - { name: "i386",    docker_platform: "linux/386",    s6_platform: "i686" }
 
     steps:
       - name: Checkout
@@ -176,7 +176,7 @@ jobs:
             ghcr.io/${{ github.repository }}-s6:${{ env.GIT_TAG }}-amd64,
             ghcr.io/${{ github.repository }}-s6:${{ env.GIT_TAG }}-arm64v8,
             ghcr.io/${{ github.repository }}-s6:${{ env.GIT_TAG }}-armv7,
-            ghcr.io/${{ github.repository }}-s6:${{ env.GIT_TAG }}-i386
+#            ghcr.io/${{ github.repository }}-s6:${{ env.GIT_TAG }}-i386
           push: true
 
       # Create and push manifest for :major tag
@@ -188,7 +188,7 @@ jobs:
             ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-amd64,
             ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-arm64v8,
             ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-armv7,
-            ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-i386
+#            ghcr.io/${{ github.repository }}-s6:${{ env.MAJOR_TAG }}-i386
           push: true
 
       # Create and push manifest for :latest tag
@@ -200,12 +200,12 @@ jobs:
             ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-amd64,
             ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-arm64v8,
             ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-armv7,
-            ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-i386
+#            ghcr.io/${{ github.repository }}-s6:${{ env.LATEST_TAG }}-i386
           push: true
 
   # Build and push single-arch Docker images to ghcr.io
   create-classic-images:
-    name: Docker push - ${{ matrix.job.name }}
+    name: Docker push classic - ${{ matrix.job.name }}
     needs: build
     runs-on: ubuntu-24.04
     strategy:
@@ -235,7 +235,7 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -246,7 +246,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5

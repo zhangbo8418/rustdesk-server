@@ -47,7 +47,7 @@ jobs:
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: "1.81"
+          toolchain: stable
           override: true
           default: true
           components: rustfmt
@@ -88,7 +88,7 @@ jobs:
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: "1.81"
+          toolchain: stable
           override: true
           default: true
           components: rustfmt
@@ -220,7 +220,7 @@ jobs:
           - { name: "amd64",   docker_platform: "linux/amd64",  s6_platform: "x86_64" }
           - { name: "arm64v8", docker_platform: "linux/arm64",  s6_platform: "aarch64" }
           - { name: "armv7",   docker_platform: "linux/arm/v7", s6_platform: "armhf" }
-          - { name: "i386",    docker_platform: "linux/386",    s6_platform: "i686" }
+#          - { name: "i386",    docker_platform: "linux/386",    s6_platform: "i686" }
 
     steps:
 
@@ -283,7 +283,7 @@ jobs:
   # docker build and push of multiarch images
   docker-manifest:
 
-    name: Docker manifest
+    name: Docker manifest s6
     needs: docker
     runs-on: ubuntu-22.04
 
@@ -311,7 +311,11 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         with:
           base-image: ${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}
-          extra-images: ${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}-amd64,${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}-arm64v8,${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}-armv7,${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}-i386
+          extra-images: |
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}-amd64,
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}-arm64v8,
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}-armv7,
+#            ${{ secrets.DOCKER_IMAGE }}:${{ env.GIT_TAG }}-i386
           push: true
 
       # manifest for :1 tag (major release)
@@ -319,7 +323,11 @@ jobs:
         uses: Noelware/docker-manifest-action@master
         with:
           base-image: ${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}
-          extra-images: ${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}-amd64,${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}-arm64v8,${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}-armv7,${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}-i386
+          extra-images: |
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}-amd64,
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}-arm64v8,
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}-armv7,
+#            ${{ secrets.DOCKER_IMAGE }}:${{ env.MAJOR_TAG }}-i386
           push: true
 
       # manifest for :latest tag
@@ -327,14 +335,18 @@ jobs:
         uses: Noelware/docker-manifest-action@master
         with:
           base-image: ${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}
-          extra-images: ${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}-amd64,${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}-arm64v8,${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}-armv7,${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}-i386
+          extra-images: |
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}-amd64,
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}-arm64v8,
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}-armv7,
+#            ${{ secrets.DOCKER_IMAGE }}:${{ env.LATEST_TAG }}-i386
           push: true
 
             
   # docker build and push of single-arch images
   docker-classic:
 
-    name: Docker push - ${{ matrix.job.name }}
+    name: Docker push classic - ${{ matrix.job.name }}
     needs: build
     runs-on: ubuntu-22.04
     strategy:
@@ -404,10 +416,9 @@ jobs:
   # docker build and push of multiarch images
   docker-manifest-classic:
 
-    name: Docker manifest
+    name: Docker manifest classic
     needs: docker
     runs-on: ubuntu-22.04
-
     steps:
 
       - name: Log in to Docker Hub

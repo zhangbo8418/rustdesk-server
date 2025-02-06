@@ -115,7 +115,6 @@ pub fn gen_sk(wait: u64) -> (String, Option<sign::SecretKey>) {
         std::process::exit(1);
     }
 
-    let sk_file = "id_ed25519";
     if wait > 0 && !std::path::Path::new(sk_file).exists() {
         std::thread::sleep(std::time::Duration::from_millis(wait));
     }

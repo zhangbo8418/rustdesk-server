@@ -27,7 +27,7 @@ rust-ini = "0.18"
 minreq = { version = "2.4", features = ["punycode"] }
 machine-uid = "0.2"
 mac_address = "1.1.5"
-whoami = "1.2"
+whoami = "1.5"
 base64 = "0.13"
 axum = { version = "0.5", features = ["headers"] }
 sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "sqlite", "macros", "chrono", "json" ] }
@@ -42,7 +42,7 @@ headers = "0.3"
 once_cell = "1.8"
 sodiumoxide = "0.2"
 tokio-tungstenite = "0.17"
-tungstenite = "0.17"
+tungstenite = "0.26"
 regex = "1.4"
 tower-http = { version = "0.3", features = ["fs", "trace", "cors"] }
 http = "0.2"

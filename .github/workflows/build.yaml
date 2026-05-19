@@ -51,21 +51,21 @@ jobs:
           submodules: recursive
 
       - name: Install toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: "1.90"
-          targets: ${{ matrix.job.target }}
+          override: true
+          default: true
+          components: rustfmt
+          profile: minimal
+          target: ${{ matrix.job.target }}
 
-      - name: Install cross
-        run: cargo install cross --git https://github.com/cross-rs/cross --tag v0.2.5 --locked
-
-      # Apply root [patch.crates-io] openssl-sys/vendored (see Cargo.toml).
-      - name: Update lockfile for vendored OpenSSL
-        run: cargo update -p openssl-sys
-
-      # hbbs/hbbr do not need hbb_common's optional `webrtc` (pulls extra deps, slows CI).
       - name: Build
-        run: cross build --release --target ${{ matrix.job.target }} -p hbbs --bin hbbs --bin hbbr --bin rustdesk-utils
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features --target=${{ matrix.job.target }}
+          use-cross: true  
 
       - name: Exec chmod
         run: chmod -v a+x target/${{ matrix.job.target }}/release/*
@@ -92,16 +92,21 @@ jobs:
           submodules: recursive
 
       - name: Install toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: "1.90"
-          targets: x86_64-pc-windows-msvc
-
-      - name: Install cross
-        run: cargo install cross --git https://github.com/cross-rs/cross --tag v0.2.5 --locked
+          override: true
+          default: true
+          components: rustfmt
+          profile: minimal
+          target: x86_64-pc-windows-msvc
 
       - name: Build
-        run: cross build --release --target x86_64-pc-windows-msvc -p hbbs --bin hbbs --bin hbbr --bin rustdesk-utils
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features --target=x86_64-pc-windows-msvc
+          use-cross: true
 
       - name: Install NSIS
         run: |

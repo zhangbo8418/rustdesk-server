@@ -59,6 +59,10 @@ jobs:
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross --tag v0.2.5 --locked
 
+      # Apply root [patch.crates-io] openssl-sys/vendored (see Cargo.toml).
+      - name: Update lockfile for vendored OpenSSL
+        run: cargo update -p openssl-sys
+
       # hbbs/hbbr do not need hbb_common's optional `webrtc` (pulls extra deps, slows CI).
       - name: Build
         run: cross build --release --target ${{ matrix.job.target }} -p hbbs --bin hbbs --bin hbbr --bin rustdesk-utils

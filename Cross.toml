@@ -1,28 +1,28 @@
-# GitHub Actions uses `cross` with musl targets. native-tls needs OpenSSL;
-# `openssl/vendored` in hbb_common still requires perl + make in the cross image.
+# Used by GitHub Actions `cross build` (musl). Works with [patch.crates-io] openssl-sys/vendored
+# in the repo root Cargo.toml — no changes inside libs/hbb_common required.
 
 [target.x86_64-unknown-linux-musl]
 pre-build = [
     "apt-get update",
-    "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends perl make pkg-config ca-certificates",
+    "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends perl make gcc pkg-config ca-certificates",
 ]
 
 [target.aarch64-unknown-linux-musl]
 pre-build = [
     "apt-get update",
-    "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends perl make pkg-config ca-certificates",
+    "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends perl make gcc pkg-config ca-certificates",
 ]
 
 [target.armv7-unknown-linux-musleabihf]
 pre-build = [
     "apt-get update",
-    "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends perl make pkg-config ca-certificates",
+    "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends perl make gcc pkg-config ca-certificates",
 ]
 
 [target.i686-unknown-linux-musl]
 pre-build = [
     "apt-get update",
-    "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends perl make pkg-config ca-certificates",
+    "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends perl make gcc pkg-config ca-certificates",
 ]
 
 # GNU Linux (optional local/cross-gnu builds)

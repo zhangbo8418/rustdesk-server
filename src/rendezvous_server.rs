@@ -1368,10 +1368,22 @@ impl RendezvousServer {
                 encrypt: None,
             }));
             while let Ok(Some(Ok(msg))) = timeout(30_000, b.next()).await {
-                if let tungstenite::Message::Binary(bytes) = msg {
-                    if !self.handle_tcp(&bytes, &mut sink, addr, key, ws).await {
-                        break;
+                let mut bytes = match msg {
+                    tungstenite::Message::Binary(bytes) => BytesMut::from(&bytes[..]),
+                    tungstenite::Message::Text(text) => BytesMut::from(text.as_bytes()),
+                    tungstenite::Message::Close(_) => break,
+                    _ => continue,
+                };
+                if let Some(Sink::Wss(s)) = sink.as_mut() {
+                    if let Some(key) = s.encrypt.as_mut() {
+                        if let Err(err) = key.dec(&mut bytes) {
+                            log::error!("dec ws data from {:?} err: {:?}", addr, err);
+                            break;
+                        }
                     }
+                }
+                if !self.handle_tcp(&bytes, &mut sink, addr, key, ws).await {
+                    break;
                 }
             }
         } else {

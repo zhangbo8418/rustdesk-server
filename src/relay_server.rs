@@ -615,20 +615,23 @@ impl StreamTrait for FramedStream {
 #[async_trait]
 impl StreamTrait for tokio_tungstenite::WebSocketStream<TcpStream> {
     async fn recv(&mut self) -> Option<Result<BytesMut, Error>> {
-        if let Some(msg) = self.next().await {
-            match msg {
-                Ok(msg) => {
-                    match msg {
-                        tungstenite::Message::Binary(bytes) => {
-                            Some(Ok(bytes[..].into())) // to-do: poor performance
-                        }
-                        _ => Some(Ok(BytesMut::new())),
+        loop {
+            match self.next().await {
+                Some(Ok(msg)) => match msg {
+                    tungstenite::Message::Binary(bytes) => {
+                        return Some(Ok(bytes[..].into()));
                     }
+                    tungstenite::Message::Text(text) => {
+                        return Some(Ok(BytesMut::from(text.as_bytes())));
+                    }
+                    tungstenite::Message::Close(_) => return None,
+                    _ => continue,
+                },
+                Some(Err(err)) => {
+                    return Some(Err(Error::new(std::io::ErrorKind::Other, err.to_string())));
                 }
-                Err(err) => Some(Err(Error::new(std::io::ErrorKind::Other, err.to_string()))),
+                None => return None,
             }
-        } else {
-            None
         }
     }
 

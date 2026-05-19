@@ -51,21 +51,17 @@ jobs:
           submodules: recursive
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: "1.90"
-          override: true
-          default: true
-          components: rustfmt
-          profile: minimal
-          target: ${{ matrix.job.target }}
+          targets: ${{ matrix.job.target }}
 
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross --tag v0.2.5 --locked
+
+      # hbbs/hbbr do not need hbb_common's optional `webrtc` (pulls extra deps, slows CI).
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --all-features --target=${{ matrix.job.target }}
-          use-cross: true  
+        run: cross build --release --target ${{ matrix.job.target }} -p hbbs --bin hbbs --bin hbbr --bin rustdesk-utils
 
       - name: Exec chmod
         run: chmod -v a+x target/${{ matrix.job.target }}/release/*
@@ -92,21 +88,16 @@ jobs:
           submodules: recursive
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: "1.90"
-          override: true
-          default: true
-          components: rustfmt
-          profile: minimal
-          target: x86_64-pc-windows-msvc
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross --tag v0.2.5 --locked
 
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --all-features --target=x86_64-pc-windows-msvc
-          use-cross: true
+        run: cross build --release --target x86_64-pc-windows-msvc -p hbbs --bin hbbs --bin hbbr --bin rustdesk-utils
 
       - name: Install NSIS
         run: |

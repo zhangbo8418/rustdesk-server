@@ -67,11 +67,6 @@ hbb_common = { path = "libs/hbb_common" }
 members = ["libs/hbb_common"]
 exclude = ["ui"]
 
-# Static musl cross-build: bundle OpenSSL for native-tls without editing libs/hbb_common.
-# Version must match openssl-sys in Cargo.lock (run `cargo update -p openssl-sys` after changing).
-[patch.crates-io]
-openssl-sys = { version = "0.9.104", features = ["vendored"] }
-
 #https://github.com/johnthagen/min-sized-rust
 #https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles
 [profile.release]

@@ -1167,7 +1167,7 @@ impl RendezvousServer {
                     "ip-blocker(ib) [<ip>|<number>] [-]",
                     "ip-changes(ic) [<id>|<number>] [-]",
                     "punch-requests(pr) [<number>] [-]",
-                    "always-use-relay(aur)",
+                    "always-use-relay(aur) [Y|N]",
                     "test-geo(tg) <ip1> <ip2>",
                     "must-login(ml) [Y|N]",
                 )

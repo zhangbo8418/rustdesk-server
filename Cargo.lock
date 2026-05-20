@@ -1124,9 +1124,9 @@ dependencies = [
 
 [[package]]
 name = "ed25519"
-version = "1.5.0"
+version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d916019f70ae3a1faa1195685e290287f39207d38e6dfee727197cffcc002214"
+checksum = "91cff35c70bba8a626e3185d8cd48cc11b5437e1a5bcd15b9b5fa3c64b6dfee7"
 dependencies = [
  "signature 1.5.0",
 ]
@@ -1671,6 +1671,7 @@ dependencies = [
  "clap 2.34.0",
  "deadpool",
  "dns-lookup",
+ "ed25519",
  "flate2",
  "flexi_logger 0.22.3",
  "hbb_common",

@@ -1,6 +1,5 @@
 use crate::common::*;
 use crate::peer::*;
-use hbb_common::bytes::BufMut;
 use hbb_common::{
     allow_err, bail,
     bytes::{Bytes, BytesMut},
@@ -1162,14 +1161,15 @@ impl RendezvousServer {
         match fds.next() {
             Some("h") => {
                 res = format!(
-                    "{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
+                    "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
                     "relay-servers(rs) <separated by ,>",
                     "reload-geo(rg)",
                     "ip-blocker(ib) [<ip>|<number>] [-]",
                     "ip-changes(ic) [<id>|<number>] [-]",
                     "punch-requests(pr) [<number>] [-]",
                     "always-use-relay(aur)",
-                    "test-geo(tg) <ip1> <ip2>"
+                    "test-geo(tg) <ip1> <ip2>",
+                    "must-login(ml) [Y|N]",
                 )
             }
             Some("relay-servers" | "rs") => {

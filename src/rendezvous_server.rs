@@ -545,7 +545,7 @@ impl RendezvousServer {
                         rf.socket_addr = AddrMangle::encode(addr).into();
                         msg_out.set_request_relay(rf);
                         let peer_addr = peer.read().await.socket_addr;
-                        self.tx.send(Data::Msg(msg_out.into(), peer_addr)).ok();
+                        allow_err!(self.send_to_peer_ws_or_udp(msg_out, peer_addr).await);
                     }
                     return true;
                 }
@@ -1056,6 +1056,25 @@ impl RendezvousServer {
         }
     }
 
+    /// Deliver to a registered peer: keep WS sinks in `ws_map` (do not remove on send).
+    /// Peers behind reverse proxy register as `IP:0` and must not fall back to UDP.
+    async fn send_to_peer_ws_or_udp(&self, msg: RendezvousMessage, peer_addr: SocketAddr) -> ResultType<()> {
+        let peer_v4 = try_into_v4(peer_addr);
+        if let Some(s) = self.ws_map.lock().await.get_mut(&peer_v4) {
+            s.send(&msg).await;
+            return Ok(());
+        }
+        if peer_v4.port() == 0 {
+            log::warn!(
+                "WebSocket peer {:?} is not in ws_map; skip UDP forward",
+                peer_v4
+            );
+            return Ok(());
+        }
+        self.tx.send(Data::Msg(msg.into(), peer_addr))?;
+        Ok(())
+    }
+
     #[inline]
     async fn send_to_tcp_sync(
         &mut self,
@@ -1076,13 +1095,8 @@ impl RendezvousServer {
         ws: bool,
     ) -> ResultType<()> {
         let (msg, to_addr) = self.handle_punch_hole_request(addr, ph, key, ws).await?;
-        if let Some(addr) = to_addr {
-            let mut sink = self.ws_map.lock().await.remove(&try_into_v4(addr));
-            if let Some(s) = sink.as_mut() {
-                s.send(&msg).await;
-            } else {
-                self.tx.send(Data::Msg(msg.into(), addr))?;
-            }
+        if let Some(peer_addr) = to_addr {
+            allow_err!(self.send_to_peer_ws_or_udp(msg, peer_addr).await);
         } else {
             self.send_to_tcp_sync(msg, addr).await?;
         }
@@ -1430,6 +1444,7 @@ impl RendezvousServer {
                     break;
                 }
             }
+            self.ws_map.lock().await.remove(&try_into_v4(addr));
         } else {
             let (a, mut b) = Framed::new(stream, BytesCodec::new()).split();
             sink = Some(Sink::Tss(SafeTcpStreamSink {
